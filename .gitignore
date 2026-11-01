@@ -1,0 +1,13 @@
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
