@@ -82,3 +82,11 @@ The model name is set once in `core/llm.py`.
 ## License
 
 MIT. See `LICENSE`.
+
+## Notes on the videos
+
+- Numbers shown in the videos (predicted returns, costs, metrics) are illustrative. Your run of the code will print
+  different values, because the fund data is synthetic and generated on your machine.
+- A few slides show simplified sketches rather than the exact file: the Day 9 tool-server sketch, the Day 8
+  Dockerfile (the real one copies a few more folders), and the MCP-enabled agent in Day 4 Part 4 (left as an exercise).
+- The data panel runs from 2020-01-01 to 2025-06-30; weekends and dates outside that range return an error by design.
