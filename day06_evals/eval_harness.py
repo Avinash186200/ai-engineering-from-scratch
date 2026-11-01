@@ -1,52 +1,47 @@
-"""Run the golden set through the day03 agent and gate on the pass rate.
+"""Run the golden set through the real Day 3 agent and gate on the pass rate.
 
-Exit code 0 if pass rate >= --min-pass (default 0.9), else 1 - so CI can block a bad change.
-Run:  python day06_evals/eval_harness.py            (FakeLLM)
+Exit code 0 if the pass rate >= THRESHOLD (90%), else 1, so CI can block a bad change.
+Run:  python day06_evals/eval_harness.py            (FakeLLM, no key)
       python day06_evals/eval_harness.py --real     (Claude)
 """
-import argparse
 import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "day03_agents"))
-from agent import build_graph  # noqa: E402
-from core.llm import get_llm  # noqa: E402
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+sys.path.insert(0, str(HERE.parent / "day03_agents"))
+from agent import ask, build_app  # noqa: E402
+from core.llm import ClaudeLLM, FakeLLM  # noqa: E402
 
-GOLDEN = Path(__file__).with_name("golden_set.json")
-
-
-def run_case(app, case):
-    cfg = {"configurable": {"thread_id": case["id"]}}
-    state = app.invoke({"messages": [{"role": "user", "content": case["question"]}], "steps": 0}, cfg)
-    used = [c["name"] for m in state["messages"] if m["role"] == "assistant" for c in m.get("tool_calls", [])]
-    answer = state["messages"][-1]["content"]
-    problems = []
-    if sorted(set(used)) != sorted(case["expect_tools"]):
-        problems.append(f"tools {used} != {case['expect_tools']}")
-    problems += [f"missing '{s}'" for s in case.get("must_contain", []) if s.lower() not in answer.lower()]
-    problems += [f"leaked '{s}'" for s in case.get("must_not_contain", []) if s.lower() in answer.lower()]
-    return problems, answer
+THRESHOLD = 0.9
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--real", action="store_true")
-    ap.add_argument("--min-pass", type=float, default=0.9)
-    args = ap.parse_args()
-    app = build_graph(get_llm(args.real))
-    cases = json.loads(GOLDEN.read_text(encoding="utf-8"))
+def run(real: bool) -> float:
+    golden = json.loads((HERE / "golden_set.json").read_text(encoding="utf-8"))
+    app = build_app(ClaudeLLM() if real else FakeLLM())
     passed = 0
-    for case in cases:
-        problems, answer = run_case(app, case)
-        passed += not problems
-        print(f"{'PASS' if not problems else 'FAIL'}  {case['id']:<18} {'; '.join(problems) or answer[:60]}")
-    rate = passed / len(cases)
-    print(f"\npass rate {passed}/{len(cases)} = {rate:.0%} (gate {args.min_pass:.0%})")
-    sys.exit(0 if rate >= args.min_pass else 1)
+    failures = []
+    print(f"{'case':<15} {'tool':<6} {'grounded':<9} {'clean':<6} result")
+    print("-" * 51)
+    for case in golden:
+        out = ask(app, case["question"], thread_id=f"eval-{case['id']}")
+        ans = out["answer"].lower()
+        tool_ok  = case["expected_tool"] in out["tools_called"]
+        grounded = all(s.lower() in ans for s in case["must_contain"])
+        clean    = not any(s.lower() in ans for s in case["must_not_contain"])
+        passed  += tool_ok and grounded and clean
+        ok = tool_ok and grounded and clean
+        print(f"{case['id']:<15} {tool_ok!s:<6} {grounded!s:<9} {clean!s:<6} {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            failures.append((case, out))
+    rate = passed / len(golden)
+    print(f"\npass rate {passed}/{len(golden)} = {rate:.0%}  (threshold {THRESHOLD:.0%})")
+    for case, out in failures:                     # why it failed, readable in the CI log
+        print(f"\nFAIL {case['id']}: tools={out['tools_called']}\n  answer: {out['answer']}")
+    return rate
 
 
 if __name__ == "__main__":
-    main()
+    rate = run(real="--real" in sys.argv)
+    sys.exit(0 if rate >= THRESHOLD else 1)

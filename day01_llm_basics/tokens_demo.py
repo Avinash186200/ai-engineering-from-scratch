@@ -1,12 +1,33 @@
-"""How tokenizers split text: a tiny BPE-style merge illustration (no downloads).
+"""How a real tokenizer cuts text into tokens.
 
-Start from characters, then repeatedly merge the most frequent adjacent pair.
+Uses tiktoken (pip install tiktoken), a free, open tokenizer. It downloads its vocabulary
+once. If tiktoken is missing or offline, a tiny BPE-style merge demo runs instead.
 Run:  python day01_llm_basics/tokens_demo.py
 """
+import sys
 from collections import Counter
 
-CORPUS = "fund funds fundamental refund nav navs expense expenses sip sips"
+sys.stdout.reconfigure(encoding="utf-8")   # the rupee sign prints on any console
 
+TEXTS = ["Which funds look best this week?",
+         "Deccan Bond Fund returned 103.031",
+         "Priya paid ₹1,250 via UPI"]
+
+
+def tiktoken_demo():
+    import tiktoken
+
+    enc = tiktoken.get_encoding("cl100k_base")
+
+    for text in ["Which funds look best this week?",
+                 "Deccan Bond Fund returned 103.031",
+                 "Priya paid ₹1,250 via UPI"]:
+        ids = enc.encode(text)
+        pieces = [enc.decode([i]) for i in ids]
+        print(len(ids), pieces)
+
+
+# ---- fallback: no download needed --------------------------------------------------------
 
 def merge_once(words):
     pairs = Counter()
@@ -30,12 +51,22 @@ def merge_once(words):
     return merged, best
 
 
-if __name__ == "__main__":
-    words = [list(w) for w in CORPUS.split()]
-    print("start:", sum(len(w) for w in words), "tokens")
-    for step in range(1, 9):
+def toy_bpe_demo(steps=12):
+    """Learn merges from our three sentences, starting from characters."""
+    words = [list(w) for t in TEXTS for w in t.split()]
+    print("start:", sum(len(w) for w in words), "tokens (one per character)")
+    for step in range(1, steps + 1):
         words, pair = merge_once(words)
-        n = sum(len(w) for w in words)
-        print(f"merge {step}: {pair[0]!r}+{pair[1]!r} -> {n} tokens")
-    print("final split:", [" ".join(w) for w in words])
-    print("rule of thumb: 1 English token ~ 4 characters; Hindi often needs more tokens per word")
+        if pair is None:
+            break
+        print(f"merge {step}: {pair[0]!r}+{pair[1]!r} -> {sum(len(w) for w in words)} tokens")
+    print("final pieces:", ["|".join(w) for w in words])
+
+
+if __name__ == "__main__":
+    try:
+        tiktoken_demo()
+    except Exception as exc:                  # not installed, or no network for the vocab
+        print(f"(tiktoken unavailable: {type(exc).__name__}; showing a toy BPE instead)\n")
+        toy_bpe_demo()
+    print("rule of thumb: 1 English token ~ 4 characters; rupee signs and Hindi need more")

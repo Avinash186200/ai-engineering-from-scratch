@@ -1,6 +1,6 @@
-"""Structured output: ask for JSON, validate it with Pydantic, retry with the error if it fails.
+"""Structured output: declare the shape with Pydantic, validate, and retry once with the error.
 
-Run:  python day02_prompting/structured_output.py          (FakeLLM, no key)
+Run:  python day02_prompting/structured_output.py          (scripted fake, no key)
       python day02_prompting/structured_output.py --real   (Claude, needs ANTHROPIC_API_KEY)
 """
 import argparse
@@ -8,61 +8,98 @@ import json
 import sys
 from pathlib import Path
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from core.fund_model import rank_funds  # noqa: E402
 from core.llm import get_llm  # noqa: E402
 
-SYSTEM = (Path(__file__).with_name("system_prompt.md")).read_text(encoding="utf-8")
 
-
-class FundPick(BaseModel):
+class Row(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    rank: int = Field(ge=1)
     fund: str
-    category: str
-    reason: str = Field(max_length=200)
-    confidence: float = Field(ge=0, le=1)
+    predicted_return: float = Field(ge=-1, le=1)   # a decimal, 0.0053
+    nav: float = Field(gt=0)
+
+
+class Ranking(BaseModel):
+    as_of: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    n_scored: int = Field(ge=0)
+    top: list[Row] = Field(min_length=1, max_length=50)
+    caveat: str = Field(min_length=1)    # never drop the caveat
+
+
+class ToolError(BaseModel):
+    error: str
+
+
+class StructuredOutputError(Exception):
+    pass
+
+
+def ask_for_json(llm, system, messages, schema_cls, max_retries=1):
+    msgs = list(messages)
+    for attempt in range(max_retries + 1):
+        reply = llm.complete(system, msgs)["text"]
+        print(f"  attempt {attempt + 1}: {reply[:110]}")
+        try:
+            return schema_cls.model_validate(json.loads(reply))
+        except (json.JSONDecodeError, ValidationError) as exc:
+            if attempt == max_retries:
+                raise StructuredOutputError(f"invalid after retry: {exc}")
+            fix = f"Your JSON failed validation:\n{exc}\nReturn corrected JSON only."
+            msgs += [{"role": "assistant", "content": reply},
+                     {"role": "user", "content": fix}]
+
+
+def parse_tool_result(result: dict) -> Ranking | ToolError:
+    """Accept either shape, a ranking or a tool error, and branch on which one you got."""
+    return ToolError(**result) if "error" in result else Ranking.model_validate(result)
 
 
 class ScriptedFakeLLM:
-    """First answer is broken on purpose (confidence 1.4, wrapped in prose); second is valid."""
+    """First reply uses a percent instead of a decimal (53.08); after the error it is fixed."""
 
-    def __init__(self):
-        self.calls = 0
+    def __init__(self, good: dict):
+        self.good, self.calls = good, 0
 
     def complete(self, system, messages, tools=None):
         self.calls += 1
-        if self.calls == 1:
-            return {"text": 'Sure! {"fund": "Bharat Growth Fund", "category": "equity_large", '
-                            '"reason": "Strong 3 month momentum", "confidence": 1.4}', "tool_calls": []}
-        return {"text": '{"fund": "Bharat Growth Fund", "category": "equity_large", '
-                        '"reason": "Strong 3 month momentum and a low expense ratio", "confidence": 0.7}',
-                "tool_calls": []}
+        bad = json.loads(json.dumps(self.good))
+        bad["top"][0]["predicted_return"] = 53.08
+        return {"text": json.dumps(bad if self.calls == 1 else self.good), "tool_calls": []}
 
 
-def extract_json(text: str) -> str:
-    start, end = text.find("{"), text.rfind("}")
-    return text[start:end + 1] if start >= 0 else text
-
-
-def ask_for_pick(llm, question: str, max_tries: int = 3) -> FundPick:
-    messages = [{"role": "user", "content": question}]
-    for attempt in range(1, max_tries + 1):
-        raw = llm.complete(SYSTEM, messages)["text"]
-        print(f"attempt {attempt}: {raw}")
-        try:
-            return FundPick.model_validate(json.loads(extract_json(raw)))
-        except (json.JSONDecodeError, ValidationError) as e:
-            err = str(e).splitlines()[0:3]
-            print(f"  invalid -> {' | '.join(err)}")
-            messages += [{"role": "assistant", "content": raw},
-                         {"role": "user", "content": f"Your JSON was invalid: {err}. Reply with JSON only."}]
-    raise RuntimeError("model never produced valid JSON")
+SYSTEM = ("Reply with JSON only, matching: {as_of, n_scored, top: [{rank, fund, "
+          "predicted_return (decimal), nav}], caveat}.")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--real", action="store_true")
     args = ap.parse_args()
-    llm = get_llm(True) if args.real else ScriptedFakeLLM()
-    pick = ask_for_pick(llm, "Pick one large-cap fund from: Bharat Growth Fund, Nifty Value Fund.")
-    print("validated:", pick.model_dump())
+    truth = {k: v for k, v in rank_funds("2025-06-19", top_n=1).items()
+             if k in ("as_of", "n_scored", "top", "caveat")}
+    print('rank_funds("2025-06-19", top_n=1) ->', json.dumps(truth))
+    llm = get_llm(True) if args.real else ScriptedFakeLLM(truth)
+    question = f"Restate this ranking as JSON: {json.dumps(truth)}"
+    print("ask_for_json:")
+    ranking = ask_for_json(llm, SYSTEM, [{"role": "user", "content": question}], Ranking)
+    print("  validated:", ranking.model_dump())
+
+    print("\nBreak it on purpose:")
+    row = dict(truth["top"][0])
+    for label, data, cls in [
+        ("predicted_return = 53.08", {**row, "predicted_return": 53.08}, Row),
+        ('nav = "48.72" (a string)', {**row, "nav": "48.72"}, Row),
+        ("500 rows", {**truth, "top": [row] * 500}, Ranking),
+        ("caveat dropped", {**truth, "caveat": ""}, Ranking),
+    ]:
+        try:
+            cls.model_validate(data)
+            print(f"  {label:<26} passes")
+        except ValidationError as exc:
+            print(f"  {label:<26} rejected: {exc.errors()[0]['msg']}")
+    sunday = parse_tool_result(rank_funds("2025-06-15"))
+    print(f"  {'rank_funds(2025-06-15)':<26} {type(sunday).__name__}: {sunday.error}")
