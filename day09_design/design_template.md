@@ -1,40 +1,26 @@
-# AI system design template
+# Design: <prompt>
 
-Use this in a system design interview or before building. Fill each section in 2-5 lines.
-Worked example in brackets: a research assistant chatbot over Indian mutual fund data.
+## 1 Clarify      users | scale | latency | sensitivity | budget
+## 2 Requirements functional / non-functional
+   Estimates:   queries/day, peak QPS, in flight, tokens, cost
+## 3 Boxes      client, API, orchestrator, tools, LLM, state, traces
+   Ask: "Where would you like me to go deep?"
+## 4 Deep dive  mechanisms + numbers + failure modes
+## 5 Security   permissions, PII, secrets, injection, audit
+## 6 Operations CI, eval gate, tracing, cost, rollback
+## 7 Trade-offs biggest trade-off | v1 | next, and when
 
-## 1. Problem and users
-Who uses it, for what decision, how often. [Analysts ask about funds ~200 times a day.]
+---
 
-## 2. Requirements
-- Functional: what it must answer. [Rank funds, define terms, cite factsheets.]
-- Non-functional: latency target, availability, cost per query, privacy. [p95 < 5 s, < 1 rupee/query.]
-- Out of scope: what it must refuse. [Personal investment advice.]
+Worked example (fill-in prompts) for the research assistant chatbot over Indian mutual funds:
 
-## 3. Data
-Sources, freshness, size, who owns them, point-in-time correctness. [Daily NAV panel, factsheets.]
-
-## 4. Architecture
-Draw the boxes: client -> API -> agent (LLM + tools) -> model / retriever / database.
-Say which parts are deterministic code and which are LLM calls, and why.
-
-## 5. Model choices
-LLM (size, provider, fallback), embedder, ranker. Prompting vs RAG vs fine-tuning, and why.
-
-## 6. Tools and retrieval
-Tool list with input schemas. Chunking, hybrid search, top-k, reranking.
-
-## 7. Evaluation
-Golden set (size, who labels it), metrics (tool accuracy, hit@k, faithfulness), CI gate threshold.
-
-## 8. Safety and security
-Prompt injection defences, least-privilege tools, PII handling, secrets management, audit logs.
-
-## 9. Reliability and cost
-Retries with backoff, failover provider, circuit breaker, timeouts, caching, token budgets.
-
-## 10. Rollout and monitoring
-Shadow mode, canary, dashboards (latency, errors, cost, eval drift), rollback plan.
-
-## 11. Risks and open questions
-Top three things that could go wrong and what you would test first.
+1. Clarify: analysts, about 200 questions a day, answer in under 5 s, fund data is internal, budget under Rs 1 a query.
+2. Requirements: rank funds, define terms, cite factsheets; never give personal advice.
+   Estimates: 200/day is a fraction of 1 QPS on average; size for 10x peaks.
+3. Boxes: browser -> FastAPI -> LangGraph agent -> tools over MCP (rank_funds, lookup_definition,
+   model_info) + LLM; Postgres checkpointer for state; traces for every step.
+4. Deep dive: the rank_funds tool contract (typed inputs, structured output with as_of, top,
+   excluded and caveat, explicit errors such as "not a business day"); retries and failover.
+5. Security: read-only tools, untrusted text wrapped in <document> tags, secrets from a vault.
+6. Operations: golden-set eval gate in CI (90%), tracing, cost per completed task, rollback.
+7. Trade-offs: an agent (flexible) vs a router (cheaper, predictable); v1 = agent with a round limit.

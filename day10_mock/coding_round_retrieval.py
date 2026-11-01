@@ -1,6 +1,6 @@
 """Mock coding round: top-k cosine retrieval in pure numpy.
 
-Task: embed a few sentences (bag-of-words here), then return the k most similar to a query.
+Bag-of-words vectors (crude but deterministic), normalised once, then one matrix multiply.
 Watch for: zero vectors, normalisation, and argpartition for large corpora.
 Run:  python day10_mock/coding_round_retrieval.py
 """
@@ -9,47 +9,51 @@ import re
 import numpy as np
 
 DOCS = [
-    "NAV is the price of one unit of a mutual fund.",
-    "The expense ratio is a yearly fee charged by the fund.",
-    "An exit load is charged if you redeem units early.",
-    "A SIP invests a fixed amount every month.",
-    "Debt funds are less volatile than small cap funds.",
+    "NAV is the net asset value of one unit of a mutual fund.",
+    "The expense ratio is the yearly fee a fund charges, as a share of assets.",
+    "A SIP is a systematic investment plan that invests a fixed amount every month.",
+    "Walk-forward validation trains on the past and tests on the next window.",
+    "MCP is a protocol that lets an agent discover and call tools on a server.",
 ]
+def tokenize(text):
+    return re.findall(r"[a-z0-9]+", text.lower())
+VOCAB = {w: i for i, w in enumerate(sorted({w for d in DOCS for w in tokenize(d)}))}
+def embed(text):
+    v = np.zeros(len(VOCAB))
+    for w in tokenize(text):
+        if w in VOCAB:
+            v[VOCAB[w]] += 1.0
+    return v
 
 
-def tokenize(s):
-    return re.findall(r"[a-z]+", s.lower())
+def normalise(m):
+    norms = np.linalg.norm(m, axis=-1, keepdims=True)
+    return m / np.where(norms == 0, 1.0, norms)   # no divide-by-zero
+
+D = normalise(np.stack([embed(d) for d in DOCS]))  # (5, |V|)
+
+def search(query, k=1):
+    q = normalise(embed(query))
+    scores = D @ q                     # cosine = dot of unit vectors
+    order = np.argsort(-scores)[:k]
+    return [(int(i), round(float(scores[i]), 3)) for i in order]
 
 
-def build_vocab(docs):
-    return {w: i for i, w in enumerate(sorted({w for d in docs for w in tokenize(d)}))}
-
-
-def embed(texts, vocab):
-    m = np.zeros((len(texts), len(vocab)))
-    for r, t in enumerate(texts):
-        for w in tokenize(t):
-            if w in vocab:
-                m[r, vocab[w]] += 1
-    return m
-
-
-def cosine_top_k(query_vec, matrix, k=2):
-    norms = np.linalg.norm(matrix, axis=1) * np.linalg.norm(query_vec)
-    sims = np.divide(matrix @ query_vec, norms, out=np.zeros(len(matrix)), where=norms > 0)
-    k = min(k, len(sims))
-    idx = np.argpartition(-sims, k - 1)[:k]          # O(n) selection, then sort just k
-    idx = idx[np.argsort(-sims[idx])]
-    return [(int(i), float(sims[i])) for i in idx]
+def search_large(query, k=1):
+    """Same result for big corpora: argpartition selects k in O(n), then sort only those k."""
+    scores = D @ normalise(embed(query))
+    k = min(k, len(scores))
+    idx = np.argpartition(-scores, k - 1)[:k]
+    idx = idx[np.argsort(-scores[idx])]
+    return [(int(i), round(float(scores[i]), 3)) for i in idx]
 
 
 if __name__ == "__main__":
-    vocab = build_vocab(DOCS)
-    M = embed(DOCS, vocab)
-    for q in ["what fee do I pay to redeem early", "monthly fixed investment", "quantum physics"]:
-        hits = cosine_top_k(embed([q], vocab)[0], M, k=2)
-        print(f"Q: {q}")
-        for i, s in hits:
+    for q in ["what is the yearly fee", "monthly fixed investment plan", "quantum physics"]:
+        print(f"Q: {q!r} -> {search(q, k=2)}")
+        for i, s in search(q, k=1):
             print(f"   {s:.3f}  {DOCS[i]}")
-    assert cosine_top_k(np.zeros(len(vocab)), M, 2)[0][1] == 0.0   # zero query is safe
+    assert search("what is the yearly fee")[0][0] == 1
+    assert search("quantum physics")[0][1] == 0.0          # unknown words: a safe zero score
+    assert search_large("monthly fixed investment plan", 2) == search("monthly fixed investment plan", 2)
     print("tests passed")

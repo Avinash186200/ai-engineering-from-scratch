@@ -1,0 +1,2 @@
+{"messages": [{"role": "system", "content": "You are a helpful research assistant."}, {"role": "user", "content": "What is a mutual fund NAV?"}, {"role": "assistant", "content": "NAV is the value of one unit of the fund: total assets minus costs, divided by units."}]}
+{"messages": [{"role": "user", "content": "Summarise this paragraph in one line: ..."}, {"role": "assistant", "content": "The paragraph argues that ..."}]}

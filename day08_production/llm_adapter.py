@@ -1,6 +1,7 @@
-"""A resilient LLM adapter: retry with exponential backoff + jitter, failover, circuit breaker.
+"""A resilient LLM adapter: retry with exponential backoff + jitter, failover, circuit breaker,
+and an overall deadline. Fatal errors (a malformed request) are never retried.
 
-Providers here are fakes by default (one flaky, one reliable). Run the demo:
+Providers here are fakes by default. Run the three scenarios:
     python day08_production/llm_adapter.py
 """
 from __future__ import annotations
@@ -13,23 +14,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core.llm import FakeLLM  # noqa: E402
 
-
-class ProviderError(Exception):
-    pass
+LLMResult = dict          # {"text": str, "tool_calls": [...]}, same as core/llm.py
 
 
-class FlakyProvider:
-    """Fails the first `fail_times` calls (like an overloaded error or a timeout), then works."""
+class RetryableError(Exception):
+    """Worth trying again: overloaded, rate limited, timeout."""
 
-    def __init__(self, name, fail_times=2, inner=None):
-        self.name, self.fail_times, self.calls = name, fail_times, 0
-        self.inner = inner or FakeLLM()
 
-    def complete(self, system, messages, tools=None):
-        self.calls += 1
-        if self.calls <= self.fail_times:
-            raise ProviderError(f"{self.name}: overloaded (call {self.calls})")
-        return self.inner.complete(system, messages, tools)
+class FatalError(Exception):
+    """Never retry: a malformed request or a bad key. Goes straight up."""
+
+
+class LLMUnavailable(Exception):
+    """Every provider failed, or the deadline ran out."""
 
 
 class CircuitBreaker:
@@ -39,67 +36,110 @@ class CircuitBreaker:
         self.threshold, self.cooldown = threshold, cooldown
         self.failures, self.opened_at = 0, None
 
-    def allow(self):
+    def is_open(self) -> bool:
         if self.opened_at is None:
-            return True
-        return time.monotonic() - self.opened_at >= self.cooldown   # half-open after cooldown
+            return False
+        if time.monotonic() - self.opened_at >= self.cooldown:   # half-open: allow a trial call
+            return False
+        return True
 
-    def record(self, ok):
-        if ok:
-            self.failures, self.opened_at = 0, None
-        else:
-            self.failures += 1
-            if self.failures >= self.threshold:
-                self.opened_at = time.monotonic()
+    def success(self):
+        self.failures, self.opened_at = 0, None
+
+    def failure(self):
+        self.failures += 1
+        if self.failures >= self.threshold:
+            self.opened_at = time.monotonic()
+
+
+class FakeProvider:
+    """Fails the first `fail_times` calls with RetryableError, then answers like FakeLLM."""
+
+    def __init__(self, name, fail_times=0, inner=None):
+        self.name, self.fail_times, self.calls = name, fail_times, 0
+        self.inner = inner or FakeLLM()
+
+    def complete(self, system, messages, tools=None) -> LLMResult:
+        self.calls += 1
+        if self.calls <= self.fail_times:
+            raise RetryableError(f"{self.name}: overloaded (call {self.calls})")
+        return self.inner.complete(system, messages, tools)
+
+
+class ClaudeProvider:
+    """Real Claude, with SDK errors mapped to RetryableError / FatalError."""
+
+    name = "claude"
+
+    def __init__(self):
+        import anthropic
+        from core.llm import ClaudeLLM
+        self.llm, self.anthropic = ClaudeLLM(), anthropic
+
+    def complete(self, system, messages, tools=None) -> LLMResult:
+        a = self.anthropic
+        try:
+            return self.llm.complete(system, messages, tools)
+        except (a.RateLimitError, a.APITimeoutError, a.APIConnectionError, a.InternalServerError) as e:
+            raise RetryableError(str(e)) from e
+        except a.APIStatusError as e:
+            raise FatalError(str(e)) from e
 
 
 class ResilientLLM:
-    def __init__(self, providers, retries=2, base_delay=0.05, log=print):
-        self.providers = providers
-        self.breakers = {p.name: CircuitBreaker() for p in providers}
-        self.retries, self.base_delay, self.log = retries, base_delay, log
+    def __init__(self, providers, attempts=3, deadline_s=20.0, log=print):
+        self.providers, self.attempts, self.deadline_s, self.log = providers, attempts, deadline_s, log
+        self.breaker = {p.name: CircuitBreaker() for p in providers}
 
-    def complete(self, system, messages, tools=None):
-        for p in self.providers:
-            br = self.breakers[p.name]
-            if not br.allow():
-                self.log(f"  [{p.name}] circuit open, skipping")
-                continue
-            for attempt in range(self.retries + 1):
+    def complete(self, system, messages, tools=None) -> LLMResult:
+        deadline = time.monotonic() + self.deadline_s
+        for provider in self.providers:              # FAILOVER
+            if self.breaker[provider.name].is_open():
+                self.log(f"  [{provider.name}] circuit open, skipping")
+                continue                             # skip a dead provider
+            for attempt in range(self.attempts):     # RETRY
                 try:
-                    out = p.complete(system, messages, tools)
-                    br.record(True)
-                    return out
-                except ProviderError as e:
-                    br.record(False)
-                    if not br.allow() or attempt == self.retries:
-                        self.log(f"  [{p.name}] {e}")
+                    result = provider.complete(system, messages, tools)
+                    self.breaker[provider.name].success()
+                    return result
+                except RetryableError as exc:
+                    self.breaker[provider.name].failure()
+                    if self.breaker[provider.name].is_open():
+                        self.log(f"  [{provider.name}] {exc}; breaker opens, failing over")
                         break
-                    delay = self.base_delay * 2 ** attempt * (1 + random.random() / 2)
-                    self.log(f"  [{p.name}] {e}; retry in {delay:.2f}s")
-                    time.sleep(delay)
-            self.log(f"  [{p.name}] giving up, failing over")
-        raise ProviderError("all providers failed")
+                    wait = 0.5 * 2 ** attempt + random.uniform(0, 0.5)
+                    if time.monotonic() + wait > deadline:
+                        raise LLMUnavailable("deadline")
+                    self.log(f"  [{provider.name}] {exc}; retry in {wait:.2f}s")
+                    time.sleep(wait)
+        raise LLMUnavailable("all providers failed")
 
 
-def default_llm(real=False, log=lambda *_: None):
-    """Primary: Claude if real else a fake; backup: always the deterministic FakeLLM."""
-    if real:
-        from core.llm import ClaudeLLM
-        primary = FlakyProvider("claude", fail_times=0, inner=ClaudeLLM())
-    else:
-        primary = FlakyProvider("primary-fake", fail_times=0)
-    return ResilientLLM([primary, FlakyProvider("backup-fake", fail_times=0)], log=log)
+def default_llm(providers=("fake",), log=lambda *_: None) -> ResilientLLM:
+    """Build the adapter from a provider list such as LLM_PROVIDERS=claude,fake."""
+    def make(name):
+        if name == "claude":
+            return ClaudeProvider()
+        if name == "down":                       # a provider that always fails, for demos
+            return FakeProvider("down", fail_times=10**9)
+        return FakeProvider(name or "fake")
+    built = [make(p.strip()) for p in providers]
+    return ResilientLLM(built, log=log)
 
 
 if __name__ == "__main__":
     random.seed(0)
     msgs = [{"role": "user", "content": "hello"}]
     print("1) flaky primary recovers after 2 retries:")
-    llm = ResilientLLM([FlakyProvider("primary", fail_times=2), FlakyProvider("backup", 0)])
+    llm = ResilientLLM([FakeProvider("primary", fail_times=2), FakeProvider("backup")])
     print("  ->", llm.complete("", msgs)["text"])
-    print("2) primary down: breaker opens and we fail over:")
-    llm = ResilientLLM([FlakyProvider("primary", fail_times=99), FlakyProvider("backup", 0)])
+    print("2) primary down: the breaker opens and we fail over:")
+    llm = ResilientLLM([FakeProvider("primary", fail_times=99), FakeProvider("backup")])
     print("  ->", llm.complete("", msgs)["text"])
     print("3) next call skips the open circuit immediately:")
     print("  ->", llm.complete("", msgs)["text"])
+    print("4) everything down:")
+    try:
+        ResilientLLM([FakeProvider("only", fail_times=99)]).complete("", msgs)
+    except LLMUnavailable as exc:
+        print("  -> LLMUnavailable:", exc)

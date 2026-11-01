@@ -1,20 +1,41 @@
 """LLM adapters shared by the day scripts.
 
-FakeLLM  - deterministic, no API key, used by default everywhere.
+FakeLLM   - deterministic, no API key, used by default everywhere.
 ClaudeLLM - the real thing via the Anthropic SDK (pip install anthropic, set ANTHROPIC_API_KEY).
 
 Both expose:  complete(system, messages, tools=None) -> {"text": str, "tool_calls": [...]}
-Messages use a simple neutral format:
-  {"role": "user", "content": "..."}
-  {"role": "assistant", "content": "...", "tool_calls": [{"id", "name", "args"}]}
-  {"role": "tool", "tool_call_id": "...", "name": "...", "content": "<json string>"}
+with tool_calls = [{"id": "call_1", "name": "rank_funds", "input": {...}}].
+
+Messages use the Anthropic Messages API shape, so they pass straight through to Claude:
+  {"role": "user", "content": "Which funds look best on 2025-06-19?"}
+  {"role": "assistant", "content": [{"type": "text", ...}, {"type": "tool_use", "id", "name", "input"}]}
+  {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "call_1", "content": "<json>"}]}
 """
 from __future__ import annotations
 
 import json
 import re
 
-MODEL = "claude-opus-5-5"
+MODEL = "claude-opus-5-5"          # set the model id once, here
+
+TERMS = ["expense ratio", "exit load", "nav", "sip", "aum", "momentum", "elss"]
+RANK_WORDS = ["top", "rank", "best", "attractive", "buy"]
+
+
+def is_tool_results(msg: dict) -> bool:
+    c = msg.get("content")
+    return msg["role"] == "user" and isinstance(c, list) and bool(c) and \
+        all(isinstance(b, dict) and b.get("type") == "tool_result" for b in c)
+
+
+def final_text(messages: list[dict]) -> str:
+    """The text of the last assistant message (plain string or text blocks)."""
+    for m in reversed(messages):
+        if m["role"] == "assistant":
+            c = m["content"]
+            return c if isinstance(c, str) else "".join(b.get("text", "") for b in c
+                                                         if b.get("type") == "text")
+    return ""
 
 
 class FakeLLM:
@@ -22,52 +43,75 @@ class FakeLLM:
 
     def complete(self, system: str, messages: list[dict], tools: list[dict] | None = None) -> dict:
         last = messages[-1]
-        if last["role"] == "tool":                      # we have results: write the answer
-            return {"text": self._summarise(messages), "tool_calls": []}
-        text = last["content"]
+        if is_tool_results(last):                       # we have results: write the answer
+            return {"text": self._summarise(last["content"]), "tool_calls": []}
+        text = last["content"] if isinstance(last["content"], str) else ""
+        names = {t["name"] for t in tools or []}
+        if not names:
+            return {"text": f"(fake LLM) You said: {text[:80]}", "tool_calls": []}
+        calls = self._decide(text, names)
+        if calls:
+            return {"text": "", "tool_calls": [{"id": f"call_{i}", **c}
+                                               for i, c in enumerate(calls, 1)]}
+        return {"text": "I can rank funds, define fund terms, describe a fund or the ranking "
+                        "model. Try: 'Which funds look best on 2025-06-19?'", "tool_calls": []}
+
+    @staticmethod
+    def _decide(text: str, names: set[str]) -> list[dict]:
         q = text.lower()
-        if not tools:
-            return {"text": self._plain(text), "tool_calls": []}
         calls = []
-        if any(w in q for w in ["top", "rank", "best"]):
+        if "rank_funds" in names and any(w in q for w in RANK_WORDS):
+            args = {}
             date = re.search(r"\d{4}-\d{2}-\d{2}", text)
-            n = re.search(r"top\s*(\d+)", q)
-            args = {"top_n": int(n.group(1)) if n else 5}
+            year = re.search(r"\b(19|20)\d{2}\b", text)
             if date:
                 args["as_of"] = date.group(0)
-            calls.append({"id": "call_1", "name": "rank_funds", "args": args})
-        m = re.search(r"(?:what is|define|meaning of)\s+(?:an?\s+|the\s+)?([a-z ]+?)[?.]?$", q)
-        if m:
-            calls.append({"id": f"call_{len(calls)+1}", "name": "lookup_term",
-                          "args": {"term": m.group(1).strip()}})
+            elif year:
+                args["as_of"] = f"{year.group(0)}-01-02"
+            args["top_n"] = 3
+            n = re.search(r"top\s*(\d+)", q)
+            if n:
+                args["top_n"] = int(n.group(1))
+            if "ridge" in q:
+                args["model"] = "ridge"
+            calls.append({"name": "rank_funds", "input": args})
+        if "model_info" in names and "model" in q and \
+                any(w in q for w in ["feature", "how many", "trained", "which model"]):
+            calls.append({"name": "model_info", "input": {}})
+        if "lookup_definition" in names and re.search(r"what is|what does|explain|define|mean", q):
+            found = [t for t in TERMS if re.search(rf"\b{t}\b", q)]
+            for t in found:
+                calls.append({"name": "lookup_definition", "input": {"term": t}})
+            m = re.search(r"what is (?:an? |the )?([a-z][a-z ]+?)\??$", q)
+            if not found and not calls and m:
+                calls.append({"name": "lookup_definition", "input": {"term": m.group(1)}})
         f = re.search(r"([A-Z][a-z]+(?: [A-Z][a-z]+)* Fund)", text)
-        if f and ("tell me about" in q or "info" in q):
-            calls.append({"id": f"call_{len(calls)+1}", "name": "fund_info", "args": {"name": f.group(1)}})
-        if calls:
-            return {"text": "", "tool_calls": calls}
-        return {"text": "I can rank funds, define terms, or describe a fund. "
-                        "Try: 'top 3 funds on 2024-11-04'.", "tool_calls": []}
+        if "fund_info" in names and f and any(w in q for w in ["tell me about", "facts", "info"]):
+            calls.append({"name": "fund_info", "input": {"name": f.group(1)}})
+        return calls
 
-    def _plain(self, text: str) -> str:
-        return f"(fake LLM) You said: {text[:80]}"
-
-    def _summarise(self, messages: list[dict]) -> str:
+    @staticmethod
+    def _summarise(blocks: list[dict]) -> str:
         parts = []
-        for m in reversed(messages):
-            if m["role"] != "tool":
-                break
-            data = json.loads(m["content"])
+        for b in blocks:
+            data = json.loads(b["content"])
             if "error" in data:
-                parts.append(f"The tool reported a problem: {data['error']}")
+                parts.append(f"I could not get that: {data['error']}")
             elif "top" in data:
-                names = ", ".join(f"{t['rank']}. {t['fund']} ({t['predicted_return']:+.2%})" for t in data["top"])
-                parts.append(f"Top funds on {data['as_of']}: {names}.")
+                names = ", ".join(f"{t['rank']}. {t['fund']} ({t['predicted_return']:+.2%})"
+                                  for t in data["top"])
+                parts.append(f"Top funds on {data['as_of']}: {names}. {data['caveat']}")
             elif "definition" in data:
-                parts.append(f"{data['term'].upper()}: {data['definition']}")
+                parts.append(f"{data['term']}: {data['definition']}")
+            elif "n_features" in data:
+                parts.append(f"The ranking models ({', '.join(data['models'])}) use "
+                             f"{data['n_features']} features: {', '.join(data['features'])}.")
             elif "fund" in data:
                 parts.append(f"{data['fund']} is a {data['category']} fund, NAV {data['nav']:.2f}, "
                              f"expense ratio {data['expense_ratio']}%.")
-        return " ".join(reversed(parts)) + " (Synthetic data, not investment advice.)"
+            else:
+                parts.append(json.dumps(data))
+        return " ".join(parts) + " (Synthetic data.)"
 
 
 class ClaudeLLM:
@@ -78,33 +122,15 @@ class ClaudeLLM:
         self.client = anthropic.Anthropic()
         self.model, self.max_tokens = model, max_tokens
 
-    @staticmethod
-    def _to_anthropic(messages: list[dict]) -> list[dict]:
-        out = []
-        for m in messages:
-            if m["role"] == "user":
-                out.append({"role": "user", "content": m["content"]})
-            elif m["role"] == "assistant":
-                blocks = [{"type": "text", "text": m["content"]}] if m.get("content") else []
-                blocks += [{"type": "tool_use", "id": c["id"], "name": c["name"], "input": c["args"]}
-                           for c in m.get("tool_calls", [])]
-                out.append({"role": "assistant", "content": blocks})
-            elif m["role"] == "tool":
-                block = {"type": "tool_result", "tool_use_id": m["tool_call_id"], "content": m["content"]}
-                if out and out[-1]["role"] == "user" and isinstance(out[-1]["content"], list):
-                    out[-1]["content"].append(block)
-                else:
-                    out.append({"role": "user", "content": [block]})
-        return out
-
     def complete(self, system: str, messages: list[dict], tools: list[dict] | None = None) -> dict:
         kwargs = {"model": self.model, "max_tokens": self.max_tokens, "system": system,
-                  "messages": self._to_anthropic(messages)}
+                  "messages": messages}
         if tools:
             kwargs["tools"] = tools
         resp = self.client.messages.create(**kwargs)
         text = "".join(b.text for b in resp.content if b.type == "text")
-        calls = [{"id": b.id, "name": b.name, "args": b.input} for b in resp.content if b.type == "tool_use"]
+        calls = [{"id": b.id, "name": b.name, "input": b.input}
+                 for b in resp.content if b.type == "tool_use"]
         return {"text": text, "tool_calls": calls}
 
 
