@@ -10,6 +10,18 @@ seed). Nothing in this repo is investment advice, and no real fund is described.
 No API key is needed. Every LLM script runs with a deterministic `FakeLLM` by default.
 Add `--real` (and set `ANTHROPIC_API_KEY`) to use Claude through the same adapter.
 
+## Watch and learn
+
+- **Full course, in order (42 episodes):** [YouTube playlist](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
+  Start with [Day 1, Part 1: What is a Large Language Model?](https://youtu.be/uXoD4kXr1YY)
+- **Lesson notes:** [`lessons/`](lessons/README.md) has one page per episode: the video, clickable chapters,
+  the slide content and the full narration, with a link to that day's code. Read along, then run the code.
+- **Shorts, one idea in 60 seconds:** [AI Engineering in 60 Seconds](https://www.youtube.com/playlist?list=PLAFfNHJdmoFI)
+  (temperature, tokens, hallucination, prompt injection, the agent loop, MCP, RAG, LoRA, evals and more).
+
+A good way to use this repo: watch an episode, open its lesson page, then run the commands in the table below and
+change things until you can predict what the code will print.
+
 ## Setup
 
 ```bash
