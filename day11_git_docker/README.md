@@ -4,8 +4,8 @@ How real AI teams track, review, test, package and ship code.
 
 | | Video | Short |
 |---|---|---|
-| Part 1: Git and GitHub | [watch](https://youtu.be/VIDEO_GIT) | [Git in 60 seconds](https://youtube.com/shorts/SHORT_GIT) |
-| Part 2: Docker | [watch](https://youtu.be/VIDEO_DOCKER) | [Docker in 60 seconds](https://youtube.com/shorts/SHORT_DOCKER) |
+| Part 1: Git and GitHub | [watch](https://youtu.be/9UtT53lkoxo) | [Git in 60 seconds](https://youtube.com/shorts/wDmf1VPZ3UI) |
+| Part 2: Docker | [watch](https://youtu.be/i3KMQ2z-cVc) | [Docker in 60 seconds](https://youtube.com/shorts/y9hwbf-fuL4) |
 
 ## What's here
 
