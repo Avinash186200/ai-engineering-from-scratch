@@ -48,6 +48,7 @@ Python 3.11. Run every command from the repo root.
 | `day08_production/` | 8 | FastAPI, SSE streaming, retries, failover, circuit breaker, Docker | `python day08_production/llm_adapter.py`<br>`python day08_production/app.py --selftest` |
 | `day09_design/` | 9 | AI system design template | read `design_template.md` |
 | `day10_mock/` | 10 | Mock interview coding rounds | `python day10_mock/coding_round_agent.py`<br>`python day10_mock/coding_round_retrieval.py` |
+| `day11_git_docker/` | 11 | Git, GitHub, CI/CD and Docker: labs, cheat sheet, interview Q&A | `python day11_git_docker/docker/app.py --selftest`<br>then follow `day11_git_docker/docker/LAB.md` |
 
 ## The tools (core/fund_model.py)
 
