@@ -1,0 +1,21 @@
+# Two services on one private network: the model service, and Nginx in front of it.
+# From the REPO ROOT:
+#   docker compose -f day11_git_docker/docker/docker-compose.yml up -d --build
+#   curl http://localhost:8080/config        (through Nginx)
+#   docker compose -f day11_git_docker/docker/docker-compose.yml down
+services:
+  model:
+    build:
+      context: ../..                         # repo root
+      dockerfile: day11_git_docker/docker/Dockerfile
+    image: day11-model:local
+    env_file: dev.env                        # config comes in at start-up
+    restart: unless-stopped
+    # no "ports:" - only reachable inside the network, through Nginx
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["8080:80"]                       # the only published port
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [model]

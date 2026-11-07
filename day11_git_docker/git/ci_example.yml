@@ -1,0 +1,39 @@
+# Example GitHub Actions workflow for a Python AI service (Day 11, Part 1).
+# To use it in your own repo, copy it to .github/workflows/ci.yml.
+# (This copy lives here as a teaching file, so it does not run in this repo.)
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt ruff mypy
+      - name: Lint (also a good place to ban direct LLM SDK imports)
+        run: ruff check .
+      - name: Types
+        run: mypy --ignore-missing-imports day11_git_docker
+      - name: Tests
+        run: python day11_git_docker/docker/app.py --selftest
+
+  image:
+    needs: checks                       # only build if checks pass
+    if: github.ref == 'refs/heads/main' # build once, on merge to main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image, tagged with the commit
+        run: docker build -f day11_git_docker/docker/Dockerfile -t day11-model:${GITHUB_SHA::7} .
+      # To push to a registry you would log in with a secret, never a key in this file:
+      #   - run: echo "${{ secrets.REGISTRY_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      #   - run: docker push ghcr.io/OWNER/day11-model:${GITHUB_SHA::7}
