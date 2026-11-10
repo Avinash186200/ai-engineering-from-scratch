@@ -3,6 +3,10 @@
 How you know an AI app is working after you ship it: trace every call, count cost, check every answer,
 watch the trends and alert on what matters.
 
+| Video | Short |
+|---|---|
+| [Day 12, full episode](https://youtu.be/VM3SasF9AAU) | [Your AI app looks healthy. 30% of answers are wrong.](https://youtube.com/shorts/ktFmHL6b3CI) |
+
 | File | What it is |
 |---|---|
 | [tracing.py](tracing.py) | One trace per request, one span per step, JSON lines; tokens, cost, latency, errors; PII redacted before logging |

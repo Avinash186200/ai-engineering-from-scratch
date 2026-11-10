@@ -4,6 +4,10 @@ Models and AI assistants are only as good as the data they are fed. This day bui
 teams do: idempotent loads, every release stored with its publication date, as-of queries, quality checks and backfills,
 and shows how look-ahead leakage makes a model look far better than it is.
 
+| Video | Short |
+|---|---|
+| [Day 14, full episode](https://youtu.be/RcC7qz3XHdY) | [Same model, same data. 6x better on paper.](https://youtube.com/shorts/GMXoIRaFR-k) |
+
 | File | What it is |
 |---|---|
 | [pipeline.py](pipeline.py) | Bitemporal table (value date + publication date), idempotent ingestion, as-of queries, freshness/gap/range/time-travel checks, backfill |

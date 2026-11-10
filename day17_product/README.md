@@ -4,6 +4,10 @@ A model is only useful if people can use it where they work. This day serves one
 (Power Query / CSV), to notebooks (a small client) and to other services (REST + OpenAPI), with versioned contracts,
 explicit units, API keys per client, typed errors, deprecation headers and a CI check that blocks breaking changes.
 
+| Video | Short |
+|---|---|
+| [Day 17, full episode](https://youtu.be/I3IkM0eAz2M) | [This API change made every spreadsheet 100x wrong.](https://youtube.com/shorts/XUnrKRaq2JU) |
+
 | File | What it is |
 |---|---|
 | [service.py](service.py) | FastAPI model API: frozen `/v1`, explicit `/v2`, CSV for spreadsheets, keys per client, deprecation headers |

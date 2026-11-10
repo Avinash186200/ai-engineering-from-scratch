@@ -12,7 +12,7 @@ Add `--real` (and set `ANTHROPIC_API_KEY`) to use Claude through the same adapte
 
 ## Watch and learn
 
-- **Full course, in order (42 episodes):** [YouTube playlist](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
+- **Full course, in order (50 episodes):** [YouTube playlist](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
   Start with [Day 1, Part 1: What is a Large Language Model?](https://youtu.be/uXoD4kXr1YY)
 - **Lesson notes:** [`lessons/`](lessons/README.md) has one page per episode: the video, clickable chapters,
   the slide content and the full narration, with a link to that day's code. Read along, then run the code.
