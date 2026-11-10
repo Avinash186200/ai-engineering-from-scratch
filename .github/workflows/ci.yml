@@ -22,3 +22,16 @@ jobs:
       - run: python day08_production/app.py --selftest
       - run: python day12_llmops/guards.py
       - run: python day12_llmops/monitor.py --selftest
+      - run: python day13_cloud/smoke_test.py --selftest
+      - run: python day13_cloud/canary.py
+      - run: python day14_pipelines/pipeline.py
+      - run: python day14_pipelines/leakage.py
+      - run: python day14_pipelines/sql_examples.py
+      - run: python -m pytest day15_testing -q
+      - run: python day16_security/auth.py
+      - run: python day16_security/tool_policy.py
+      - run: python day16_security/injection.py
+      - run: python day16_security/secrets_scan.py
+      - run: python day17_product/service.py
+      - run: python day17_product/client.py
+      - run: python day17_product/contract_check.py
