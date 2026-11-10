@@ -1,0 +1,33 @@
+# The same Cloud Run service as deploy.yml, written declaratively.
+# Apply with:  gcloud run services replace service.yaml --region asia-south1
+# Declarative files live in Git, so every change to scaling, memory or secrets is reviewed in a PR.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: model-service
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"     # 1 warm instance: no cold start for the first user
+        autoscaling.knative.dev/maxScale: "10"    # a cost ceiling
+    spec:
+      containerConcurrency: 40                    # requests per instance; LLM calls mostly wait on I/O
+      timeoutSeconds: 120
+      serviceAccountName: model-service@MY_PROJECT.iam.gserviceaccount.com   # least privilege
+      containers:
+        - image: asia-south1-docker.pkg.dev/MY_PROJECT/apps/model-service:main-ce57d87
+          ports:
+            - containerPort: 8000
+          resources:
+            limits: {cpu: "1", memory: 1Gi}
+          env:
+            - name: MODEL_NAME
+              value: small-model
+            - name: API_KEY                        # from Secret Manager, never in this file
+              valueFrom:
+                secretKeyRef: {name: api-key, key: latest}
+          startupProbe:
+            httpGet: {path: /health, port: 8000}
+          livenessProbe:
+            httpGet: {path: /health, port: 8000}

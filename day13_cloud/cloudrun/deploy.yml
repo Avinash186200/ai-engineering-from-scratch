@@ -1,0 +1,66 @@
+# GitHub Actions: build once, push to Artifact Registry, deploy to Cloud Run as a canary,
+# smoke test it, then move traffic. Copy to .github/workflows/deploy.yml in your own repo.
+#
+# One-time setup (see ../LAB.md step 4):
+#   - an Artifact Registry repo:      gcloud artifacts repositories create apps --repository-format=docker --location=asia-south1
+#   - Workload Identity Federation so GitHub can deploy WITHOUT a stored JSON key
+#   - repo variables: GCP_PROJECT, GCP_REGION, WIF_PROVIDER, DEPLOY_SA
+#   - the secret itself lives in Secret Manager (api-key), never in GitHub or the image
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write          # lets GitHub prove who it is to Google (OIDC); no long-lived key
+
+env:
+  IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT }}/apps/model-service
+  TAG: main-${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production          # add required reviewers here for a manual approval gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and push (tag = commit, so the image always maps to exact code)
+        run: |
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+          docker build -f day11_git_docker/docker/Dockerfile -t $IMAGE:$TAG .
+          docker push $IMAGE:$TAG
+
+      - name: Deploy new revision with NO traffic
+        run: |
+          gcloud run deploy model-service \
+            --image $IMAGE:$TAG --region ${{ vars.GCP_REGION }} \
+            --set-env-vars APP_VERSION=$TAG,MODEL_NAME=small-model \
+            --set-secrets API_KEY=api-key:latest \
+            --min-instances 1 --max-instances 10 --cpu 1 --memory 1Gi \
+            --no-traffic --tag canary
+
+      - name: Smoke test the canary URL
+        run: |
+          URL=$(gcloud run services describe model-service --region ${{ vars.GCP_REGION }} --format=json \
+                | python3 -c "import json,sys; t=json.load(sys.stdin)['status']['traffic']; print([x['url'] for x in t if x.get('tag')=='canary'][0])")
+          # smoke_test.py uses only the standard library in this mode.
+          # This assumes the service allows unauthenticated calls (it has its own API auth).
+          # For a private service, send an identity token: gcloud auth print-identity-token
+          python day13_cloud/smoke_test.py "$URL" --version $TAG
+
+      - name: Send 10% of traffic to the new revision
+        run: gcloud run services update-traffic model-service --region ${{ vars.GCP_REGION }} --to-tags canary=10
+
+      # In a real setup: wait, compare metrics with day13_cloud/canary.py rules, then:
+      #   gcloud run services update-traffic model-service --to-latest            (promote)
+      #   gcloud run services update-traffic model-service --to-revisions OLD=100 (roll back)

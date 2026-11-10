@@ -1,0 +1,398 @@
+{
+ "components": {
+  "schemas": {
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "title": "Detail",
+      "type": "array"
+     }
+    },
+    "title": "HTTPValidationError",
+    "type": "object"
+   },
+   "RankingV1": {
+    "properties": {
+     "as_of": {
+      "title": "As Of",
+      "type": "string"
+     },
+     "top": {
+      "items": {
+       "$ref": "#/components/schemas/RowV1"
+      },
+      "title": "Top",
+      "type": "array"
+     }
+    },
+    "required": [
+     "as_of",
+     "top"
+    ],
+    "title": "RankingV1",
+    "type": "object"
+   },
+   "RankingV2": {
+    "properties": {
+     "as_of_used": {
+      "title": "As Of Used",
+      "type": "string"
+     },
+     "caveat": {
+      "title": "Caveat",
+      "type": "string"
+     },
+     "excluded_count": {
+      "title": "Excluded Count",
+      "type": "integer"
+     },
+     "model": {
+      "title": "Model",
+      "type": "string"
+     },
+     "model_version": {
+      "title": "Model Version",
+      "type": "string"
+     },
+     "n_scored": {
+      "title": "N Scored",
+      "type": "integer"
+     },
+     "top": {
+      "items": {
+       "$ref": "#/components/schemas/RowV2"
+      },
+      "title": "Top",
+      "type": "array"
+     }
+    },
+    "required": [
+     "as_of_used",
+     "model",
+     "model_version",
+     "n_scored",
+     "excluded_count",
+     "caveat",
+     "top"
+    ],
+    "title": "RankingV2",
+    "type": "object"
+   },
+   "RowV1": {
+    "properties": {
+     "fund": {
+      "title": "Fund",
+      "type": "string"
+     },
+     "nav": {
+      "title": "Nav",
+      "type": "number"
+     },
+     "predicted_return": {
+      "title": "Predicted Return",
+      "type": "number"
+     },
+     "rank": {
+      "title": "Rank",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "rank",
+     "fund",
+     "predicted_return",
+     "nav"
+    ],
+    "title": "RowV1",
+    "type": "object"
+   },
+   "RowV2": {
+    "properties": {
+     "fund": {
+      "title": "Fund",
+      "type": "string"
+     },
+     "nav": {
+      "title": "Nav",
+      "type": "number"
+     },
+     "predicted_return_pct": {
+      "title": "Predicted Return Pct",
+      "type": "number"
+     },
+     "rank": {
+      "title": "Rank",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "rank",
+     "fund",
+     "predicted_return_pct",
+     "nav"
+    ],
+    "title": "RowV2",
+    "type": "object"
+   },
+   "ValidationError": {
+    "properties": {
+     "ctx": {
+      "title": "Context",
+      "type": "object"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "title": "Location",
+      "type": "array"
+     },
+     "msg": {
+      "title": "Message",
+      "type": "string"
+     },
+     "type": {
+      "title": "Error Type",
+      "type": "string"
+     }
+    },
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError",
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "The same ranking model the research assistant uses, for Excel, notebooks and services.",
+  "title": "Fund ranking model API",
+  "version": "2.0"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/health": {
+   "get": {
+    "operationId": "health_health_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "title": "Response Health Health Get",
+         "type": "object"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Health"
+   }
+  },
+  "/v1/rank": {
+   "get": {
+    "deprecated": true,
+    "operationId": "rank_v1_v1_rank_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "as_of",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "As Of",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "top_n",
+      "required": false,
+      "schema": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 1,
+       "title": "Top N",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-api-key",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "X-Api-Key",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RankingV1"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Rank V1"
+   }
+  },
+  "/v2/rank": {
+   "get": {
+    "operationId": "rank_v2_v2_rank_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "as_of",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "As Of",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "top_n",
+      "required": false,
+      "schema": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 1,
+       "title": "Top N",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-api-key",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "X-Api-Key",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RankingV2"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Rank V2"
+   }
+  },
+  "/v2/rank.csv": {
+   "get": {
+    "description": "Flat CSV for spreadsheets: Excel can load this with Data > From Web, or Power Query.",
+    "operationId": "rank_v2_csv_v2_rank_csv_get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "as_of",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "As Of",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "top_n",
+      "required": false,
+      "schema": {
+       "default": 5,
+       "maximum": 20,
+       "minimum": 1,
+       "title": "Top N",
+       "type": "integer"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-api-key",
+      "required": false,
+      "schema": {
+       "default": "",
+       "title": "X-Api-Key",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "text/plain": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Rank V2 Csv"
+   }
+  }
+ }
+}

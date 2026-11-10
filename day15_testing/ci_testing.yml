@@ -1,0 +1,54 @@
+# The testing pyramid as a GitHub Actions workflow. Copy to .github/workflows/test.yml in your project.
+# Fast checks first: if lint fails in 10 seconds, don't spend 10 minutes on evals.
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  static:                                   # seconds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install ruff mypy pydantic
+      - run: ruff check . && ruff format --check .
+      - run: mypy src/
+
+  unit-and-property:                        # under a minute
+    needs: static
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt pytest pytest-cov hypothesis
+      - run: pytest -m "not llm and not slow" --cov=src --cov-report=term-missing
+
+  api-contract:                             # a few minutes: start the real app, fuzz every endpoint
+    needs: unit-and-property
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt "schemathesis<4"   # flags below are 3.x; 4.x renamed some
+      - run: |
+          uvicorn src.app:app --port 8000 &
+          sleep 5
+          schemathesis run http://localhost:8000/openapi.json --checks all --hypothesis-max-examples 50
+
+  evals:                                    # the quality gate: golden set with a pass-rate threshold
+    needs: api-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: python evals/eval_harness.py   # exits 1 if the pass rate is below the threshold (Day 6)
+        env:
+          LLM_PROVIDERS: fake               # use the real model in a nightly job, with its key from Secrets

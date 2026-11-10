@@ -1,0 +1,37 @@
+# Tool settings for an AI service. Copy the sections you want into your project's pyproject.toml.
+
+[tool.ruff]                      # linter + formatter: catches bugs and style issues in milliseconds
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "ASYNC"]
+#  E/F  = errors and undefined names     I = import order      B = likely bugs (mutable defaults...)
+#  UP   = modern syntax                   S = security (bandit rules: hard-coded secrets, eval, shell=True)
+#  ASYNC = blocking calls inside async code (a classic cause of slow LLM servers)
+ignore = ["S101"]                # allow assert in tests
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S"]
+
+[tool.mypy]                      # static types: catches 'None has no attribute' before production does
+python_version = "3.11"
+strict = true                    # no untyped functions, no implicit Any, no implicit Optional
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+  "slow: long-running tests (skip locally with -m 'not slow')",
+  "llm: calls a real model API; run in the nightly eval job, not on every PR",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
