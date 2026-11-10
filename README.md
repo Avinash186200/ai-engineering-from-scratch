@@ -49,6 +49,7 @@ Python 3.11. Run every command from the repo root.
 | `day09_design/` | 9 | AI system design template | read `design_template.md` |
 | `day10_mock/` | 10 | Mock interview coding rounds | `python day10_mock/coding_round_agent.py`<br>`python day10_mock/coding_round_retrieval.py` |
 | `day11_git_docker/` | 11 | Git, GitHub, CI/CD and Docker: labs, cheat sheet, interview Q&A | `python day11_git_docker/docker/app.py --selftest`<br>then follow `day11_git_docker/docker/LAB.md` |
+| `day12_llmops/` | 12 | LLMOps: tracing, cost, guards against hallucination, monitoring, drift, alerts | `python day12_llmops/guards.py`<br>`python day12_llmops/monitor.py --selftest` |
 
 ## The tools (core/fund_model.py)
 

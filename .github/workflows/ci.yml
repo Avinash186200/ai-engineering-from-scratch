@@ -20,3 +20,5 @@ jobs:
       - run: python core/fund_model.py
       - run: python day06_evals/eval_harness.py
       - run: python day08_production/app.py --selftest
+      - run: python day12_llmops/guards.py
+      - run: python day12_llmops/monitor.py --selftest
