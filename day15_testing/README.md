@@ -4,6 +4,10 @@ How to test an application whose core component is non-deterministic: test the d
 state properties that must hold for all inputs, lock down the API contract, check LLM behaviour by structure and
 grounding instead of wording, and measure quality with evals.
 
+| Video | Short |
+|---|---|
+| [Day 15, full episode](https://youtu.be/L3Sy2QjZFSI) | [How do you test an AI that answers differently every time?](https://youtube.com/shorts/621DD5uFK5c) |
+
 | File | What it is |
 |---|---|
 | [conftest.py](conftest.py) | Shared pytest fixtures: the app loaded once, a test client |

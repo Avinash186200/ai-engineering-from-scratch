@@ -3,6 +3,10 @@
 From a container on your laptop to a service on the internet: registry, Cloud Run or a VM, secrets,
 HTTPS, canary releases, smoke tests, rollback and database backups.
 
+| Video | Short |
+|---|---|
+| [Day 13, full episode](https://youtu.be/Ik35kncqBfQ) | [Health check says OK. The old version is still running.](https://youtube.com/shorts/-R3smpF9Fh0) |
+
 | File | What it is |
 |---|---|
 | [smoke_test.py](smoke_test.py) | Post-deploy checks against a real URL: health, the right version, secret present, a known model answer, clean errors. Exit code drives rollback |

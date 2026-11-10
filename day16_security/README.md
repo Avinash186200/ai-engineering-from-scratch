@@ -4,6 +4,10 @@ What changes when software can be talked into things: authentication and authori
 between the model and its tools, indirect prompt injection and why prompts alone can't stop it, rate limits, audit logs,
 and keeping secrets out of Git. Mapped to the OWASP Top 10 for LLM applications.
 
+| Video | Short |
+|---|---|
+| [Day 16, full episode](https://youtu.be/4DQKs1686fc) | [One hidden line in a PDF can hijack your AI agent.](https://youtube.com/shorts/_-bUjq4o0s0) |
+
 | File | What it is |
 |---|---|
 | [auth.py](auth.py) | Signed expiring tokens, roles, ownership checks: 401 vs 403 vs 404, enforced on the server |
