@@ -18,6 +18,9 @@ Add `--real` (and set `ANTHROPIC_API_KEY`) to use Claude through the same adapte
   the slide content and the full narration, with a link to that day's code. Read along, then run the code.
 - **Shorts, one idea in 60 seconds:** [AI Engineering in 60 Seconds](https://www.youtube.com/playlist?list=PLAFfNHJdmoFI)
   (temperature, tokens, hallucination, prompt injection, the agent loop, MCP, RAG, LoRA, evals and more).
+- **Interview prep:** [10 AI agent interview questions with model answers](https://youtu.be/_rVcMiSIjro)
+  (memory, caching, routing, evals, guardrails and more), written up in [`interview_special/`](interview_special/README.md),
+  plus 30-second answers in the [Interview Prep playlist](https://www.youtube.com/playlist?list=PLO8FrBIinbsY).
 
 A good way to use this repo: watch an episode, open its lesson page, then run the commands in the table below and
 change things until you can predict what the code will print.
@@ -55,6 +58,7 @@ Python 3.11. Run every command from the repo root.
 | `day15_testing/` | 15 | Testing AI services: pytest, Hypothesis, API contracts, LLM behaviour tests, CI | `python -m pytest day15_testing -q` |
 | `day16_security/` | 16 | Security: prompt injection, tool policy gate, auth, secrets scanning | `python day16_security/injection.py`<br>`python day16_security/tool_policy.py` |
 | `day17_product/` | 17 | Models as a product: one model for agent, Excel, notebooks; versioned API; contract check | `python day17_product/service.py`<br>`python day17_product/contract_check.py` |
+| `interview_special/` | special | 10 AI agent interview questions with model answers and timestamps | read `README.md` |
 
 ## The tools (core/fund_model.py)
 
