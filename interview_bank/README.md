@@ -37,3 +37,21 @@ forecasting or churn model as examples. Replace them with your own work when you
 2. Mark the ones you could not answer in under a minute. Repeat only those the next day.
 3. For every answer, add one sentence about something you built or ran yourself. That sentence is what makes
    an answer believable.
+
+## Practise with flashcards
+
+[`flashcards.csv`](flashcards.csv) has every question in this repo as a card. The answer is the first sentences
+(about 80 words) of the full answer, then the file that has the rest. The third column is the topic, used as a tag.
+
+After you change any question file, rebuild it. CI fails if the file is out of date
+(`day15_testing/test_flashcards.py`).
+
+```bash
+python interview_bank/make_flashcards.py
+```
+
+- **Anki**: File > Import and pick `flashcards.csv`. Set the field separator to Comma and turn Allow HTML off. Map
+  column 1 to Front, column 2 to Back and column 3 to Tags. The header row comes in as one extra card: search
+  `tag:tags` and delete it.
+- **Quizlet**: open the file in a spreadsheet, copy the question and answer cells without the header row, and
+  paste them into Quizlet's import box. Choose Tab between term and definition and New line between cards.
