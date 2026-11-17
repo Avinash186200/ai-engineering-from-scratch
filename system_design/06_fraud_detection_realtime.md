@@ -68,13 +68,16 @@ flowchart LR
   Then replay a day of events through the streaming path and compare with batch values; fail the release if more
   than a tiny share differ beyond tolerance.
 - **Point in time**: "payments in the last hour" excludes the current payment and anything after it. Training uses
-  as-of joins on event time.
-- **Velocity counters**: per-minute buckets in a key-value store, summed at read time, so a read is a few lookups.
+  as-of joins on ingest time (when each event reached the system), so a late event counts only from when serving
+  could have seen it.
+- **Velocity counters**: time buckets per card in a key-value store (per minute for the last hour, per hour for the
+  last day), summed at read time in one batched read.
 
 ## 6. Deep dive: extreme imbalance and cost-weighted thresholds
 
-- At 0.1% fraud, ROC-AUC is high for almost any model and says little. Use PR-AUC, fraud caught at a fixed false
-  decline rate (for example 1 in 1,000 good payments), and the share of fraud money caught.
+- At 0.1% fraud, ROC-AUC can look excellent while precision is poor: declining just 1% of good payments means about
+  ten false declines for every fraud. Use PR-AUC, fraud caught at a fixed false decline rate (for example 1 in 1,000
+  good payments), and the share of fraud money caught.
 - **Downsampling**: keep, say, 1 in 20 good payments to speed up training. Then correct the probability: with a keep
   rate s, p = s x q / (s x q + 1 - q), where q is the model's output. Or recalibrate on a recent, untouched slice.
 - **Threshold by cost, per payment**: approving costs p x A (A = amount plus fees); declining costs (1 - p) x C, where

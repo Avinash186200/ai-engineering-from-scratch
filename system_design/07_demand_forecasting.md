@@ -17,7 +17,7 @@ next 28 days, to drive replenishment orders." (Design 2 puts a copilot on top of
   a promotion effect planners can read.
 - Non-functional: the batch fits in 4 hours, every run is reproducible (data snapshot plus model version), and no model
   goes live without a backtest that beats the baselines.
-- Output (estimate): 20 M series x 28 days = 560 M rows a night; with 3 quantiles, about 1.7 B numbers, about 7 GB
+- Output (estimate): 20 M series x 28 days = 560 M rows a night; with P50 and P90, about 1.1 B numbers, about 4.5 GB
   raw at 4 bytes each.
 - History (estimate): 20 M series x 3 years x 365 days = about 22 B store-item-days. Most are zero, so store only
   non-zero sales plus a calendar.

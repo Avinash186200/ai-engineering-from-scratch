@@ -82,7 +82,7 @@ flowchart LR
 - **Offline**: recall@k for retrieval; NDCG@k and MRR for ranking; log loss and calibration for the click model.
   Always on a later time window. A random split leaks future interactions.
 - **Recall is not order.** In the same benchmark, BM25 had recall@5 of 0.898 but MRR of 0.573. The right item was
-  usually in the list, but not near the top, and the top is what users see.
+  usually in the list, but often not first, and the top is what users see.
 - **Offline data is biased**: logs only hold what the old model chose to show. A new model that likes items the old
   one never showed has no labels for them, so offline metrics favour models that copy the old one.
 - **Corrections**: log the probability of each item being shown, keep a little randomisation, and weight by inverse
