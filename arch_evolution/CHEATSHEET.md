@@ -17,7 +17,7 @@
 - 30-question end-to-end set: 30/30 for router and agent offline; pass^3 30/30, 18 dev / 12 held out, 0 flaky.
 - Serving router: 28% cheaper than always-large, p50 4.80 s to 2.62 s, but 15% of queries under-served.
 - Bounds: measured max 3 model calls, ~4,500 tokens over 38 offline runs; shipped 5 calls, 14,000 tokens.
-- Rule for bounds: 2x largest call counts, +2 model calls, 3x tokens.
+- Rule for bounds: tool calls 2x the largest seen, model calls the largest seen + 2, tokens 3x the largest.
 
 ## Five rules
 

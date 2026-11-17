@@ -217,7 +217,7 @@ A gateway in front of LLM providers: one API for many providers, key management,
 
 ```text
 WHY
-- Switch or mix providers/models by config (cost, quality, outages, client requirements, data residency).
+- Switch or mix providers/models by config (cost, quality, outages, customer requirements, data residency).
 - Failover when a provider is down (Day 8).
 - One place for retries, timeouts, logging, cost tracking, redaction, prompt caching.
 - Avoid business logic scattered across vendor SDK calls.
@@ -236,7 +236,7 @@ Lowest-common-denominator risk: provider-specific features (prompt caching, stru
 
 </details>
 
-**Answer:** It lets me switch or mix providers by config for cost, quality, outages or client requirements, fail over when one is down, and keep retries, timeouts, logging, cost tracking and redaction in one place, plus a fake implementation for tests. I define my own interface, like complete with system, messages and tools returning text, tool calls and usage, write one adapter per provider that normalises messages, tool calls, usage and errors, choose models per task in config, and enforce the boundary with a lint rule that forbids vendor SDK imports outside the adapter. The trade-off is that provider-specific features need explicit support, or you use a maintained gateway like LiteLLM.
+**Answer:** It lets me switch or mix providers by config for cost, quality, outages or customer requirements, fail over when one is down, and keep retries, timeouts, logging, cost tracking and redaction in one place, plus a fake implementation for tests. I define my own interface, like complete with system, messages and tools returning text, tool calls and usage, write one adapter per provider that normalises messages, tool calls, usage and errors, choose models per task in config, and enforce the boundary with a lint rule that forbids vendor SDK imports outside the adapter. The trade-off is that provider-specific features need explicit support, or you use a maintained gateway like LiteLLM.
 
 ### 10. How do you route requests between models to balance cost and quality?
 
@@ -334,7 +334,7 @@ Show model_version and as_of_used in the sheet; pin dates in reports; announce m
 
 **Answer:** I ask which numbers, which as-of date and which add-in or query version, then look at their actual requests by API key and trace ID and compare responses for the same parameters across days. The usual causes are a new model version, data revisions or a backfill for that date, a contract change like units or defaults, or a query asking for 'latest' so it naturally moves daily. I check the deploy log, pipeline runs and load times for that period. To prevent confusion, sheets show the model version and as-of date, reports pin dates, and model changes are announced.
 
-### 14. Design a platform to serve several proprietary models to internal and client users.
+### 14. Design a platform to serve several proprietary models to internal and external users.
 
 <details><summary>Understand it</summary>
 

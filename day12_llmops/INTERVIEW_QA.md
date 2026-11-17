@@ -216,7 +216,7 @@ NEVER LOG (or redact first)
 - Passwords, API keys, tokens, connection strings
 - Personal data: emails, phone numbers, government IDs, account numbers
 - Full documents that are confidential, unless your log store has the same access controls as the source
-- Anything your privacy policy or the client contract excludes
+- Anything your privacy policy or the customer contract excludes
 
 RULE: REDACT BEFORE WRITE
 If you redact later, the secret already sits in log files, backups and the vendor's servers. The Day 12 tracer runs redact() inside the span before anything is written.
@@ -709,7 +709,7 @@ Time to detect, time to mitigate. Shortening time to detect is usually the bigge
 STRUCTURE YOUR ANSWER (5 parts)
 
 1. INSTRUMENT
-OpenTelemetry tracing on every service: one trace per question; spans for retrieval, each LLM call, each tool call, guards. Attributes: model and version, prompt version, tokens, cost, latency, tool args, doc IDs, data as-of date. Redact PII and client identifiers before export.
+OpenTelemetry tracing on every service: one trace per question; spans for retrieval, each LLM call, each tool call, guards. Attributes: model and version, prompt version, tokens, cost, latency, tool args, doc IDs, data as-of date. Redact PII and customer identifiers before export.
 
 2. STORE
 Traces and metrics in the firm's own cloud (self-hosted Langfuse or Phoenix plus Grafana/Prometheus), because the data is confidential. Raw text retention 30 days with restricted, audited access; metrics 13 months.
@@ -725,12 +725,12 @@ Reliability (errors, p95), cost per analyst per day, quality (guard pass, judge,
 Failures -> golden set; scheduled eval runs; prompt and model changes go through CI evals and canary; monthly review with users.
 
 FINANCE EXTRAS
-Audit trail: which data and model version produced each number (regulators and clients may ask). Point-in-time correctness: show the as-of date in every answer.
+Audit trail: which data and model version produced each number (regulators and customers may ask). Point-in-time correctness: show the as-of date in every answer.
 ```
 
 </details>
 
-**Answer:** I'd do five things. Instrument every service with OpenTelemetry, with one trace per question and spans for retrieval, LLM calls, tools and guards, recording model and prompt versions, tokens, cost and the data as-of date, redacting client data before export. Store it inside the firm's cloud, for example self-hosted Langfuse plus Grafana, with short retention and audited access for raw text. Check every answer: numbers grounded in tool output, known securities only, and the required caveat, with a sampled judge and weekly expert review. Dashboard and alerts on reliability, cost, quality, drift and especially data freshness. Then close the loop: failures go into the golden set, and every change goes through CI evals and a canary. In finance I'd add an audit trail of which data and model version produced each number.
+**Answer:** I'd do five things. Instrument every service with OpenTelemetry, with one trace per question and spans for retrieval, LLM calls, tools and guards, recording model and prompt versions, tokens, cost and the data as-of date, redacting customer data before export. Store it inside the firm's cloud, for example self-hosted Langfuse plus Grafana, with short retention and audited access for raw text. Check every answer: numbers grounded in tool output, known securities only, and the required caveat, with a sampled judge and weekly expert review. Dashboard and alerts on reliability, cost, quality, drift and especially data freshness. Then close the loop: failures go into the golden set, and every change goes through CI evals and a canary. In finance I'd add an audit trail of which data and model version produced each number.
 
 ### 24. Your LLM costs doubled this month. How do you investigate?
 
@@ -757,14 +757,14 @@ History resent in full on every turn; a retry storm during a provider incident; 
 
 **Answer:** First, split it: did volume double or cost per request? If volume, find which users or features, often a new integration, a script or a retry loop. If cost per request, use traces to split it into input tokens, output tokens, calls per request and model mix, then line up the change point with deploys and prompt versions. Common causes are full chat history resent each turn, a retry storm, agent loops, or routing sending everything to the big model. Then fix it, and add an alert on cost per request against baseline and per-feature budgets.
 
-### 25. The bot gives a wrong answer to an important client. Walk me through what you do.
+### 25. The bot gives a wrong answer to an important customer. Walk me through what you do.
 
 <details><summary>Understand it</summary>
 
 ```text
 IMMEDIATELY
 1. Get the trace (trace_id from the session, or search by user and time).
-2. Correct the record with the client quickly and honestly: what was wrong, the right number, the fix in progress.
+2. Correct the record with the customer quickly and honestly: what was wrong, the right number, the fix in progress.
 
 DIAGNOSE WITH THE TRACE: WHERE DID IT GO WRONG?
 - Input: did we misunderstand the question (wrong date, wrong security)?
@@ -787,7 +787,7 @@ Never present a research model as certain. The answer should have carried a cave
 
 </details>
 
-**Answer:** I pull the trace for that conversation and quickly tell the client what was wrong and the correct figure. Then I use the trace to find where it broke: misread question, wrong or stale data from the tool, the model inventing or misreading a number, or a formatting or unit error. I check whether it's a pattern by searching traces for the same failure and looking at recent deploys. Then I fix the root cause, add the case to the golden set, and add a guard so that class of error is caught before users see it, like a grounded-number check or a data freshness check with the as-of date shown.
+**Answer:** I pull the trace for that conversation and quickly tell the customer what was wrong and the correct figure. Then I use the trace to find where it broke: misread question, wrong or stale data from the tool, the model inventing or misreading a number, or a formatting or unit error. I check whether it's a pattern by searching traces for the same failure and looking at recent deploys. Then I fix the root cause, add the case to the golden set, and add a guard so that class of error is caught before users see it, like a grounded-number check or a data freshness check with the as-of date shown.
 
 ### 26. Which LLMOps tools have you used, and how would you choose between them?
 
@@ -812,12 +812,12 @@ CHOOSING CRITERIA
 5. Cost at your volume, and open standards (OTel) to avoid lock-in.
 
 SCRIPT
-'We used OpenTelemetry across the services. For prompt-level work I'd add Langfuse self-hosted, because client data had to stay in our environment, and it accepts OTel so we wouldn't re-instrument.'
+'We used OpenTelemetry across the services. For prompt-level work I'd add Langfuse self-hosted, because customer data had to stay in our environment, and it accepts OTel so we wouldn't re-instrument.'
 ```
 
 </details>
 
-**Answer:** We instrumented with OpenTelemetry, which is the standard. Beyond that I choose by a few criteria: data residency first, since client prompts often can't leave our cloud, which points to self-hosted Langfuse or Phoenix; what the company already runs, so OTel into Datadog or Grafana; whether we need prompt review, datasets and judges or just ops metrics; framework coupling, as LangSmith fits LangChain best; and cost and lock-in. For evals I'd use our own harness or promptfoo, and Ragas for RAG metrics.
+**Answer:** We instrumented with OpenTelemetry, which is the standard. Beyond that I choose by a few criteria: data residency first, since customer prompts often can't leave our cloud, which points to self-hosted Langfuse or Phoenix; what the company already runs, so OTel into Datadog or Grafana; whether we need prompt review, datasets and judges or just ops metrics; framework coupling, as LangSmith fits LangChain best; and cost and lock-in. For evals I'd use our own harness or promptfoo, and Ragas for RAG metrics.
 
 ### 27. How do you safely roll out a new prompt or model?
 

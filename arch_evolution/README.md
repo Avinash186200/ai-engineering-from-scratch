@@ -201,7 +201,7 @@ hidden, so nobody knows what a turn really costs.
 
 **The change.** Make every bound a setting: tool calls per step, model calls per turn, tokens, spend. Count
 everything in a per-turn ledger, including retries. Then run the eval set with loose bounds, measure, and apply
-a fixed rule. My rule: 2x the largest call counts, plus 2 spare model calls, and 3x the tokens.
+a fixed rule. My rule: tool-call limits get 2x the largest count seen, model calls get the largest count plus 2 spare, and tokens get 3x the largest.
 
 On my offline run (38 runs, scripted model): at most 3 model calls, 1 tool call per step, 1 repair and about
 4,500 tokens. That gave defaults of 5 model calls, 2 calls per step, and 14,000 tokens.
@@ -213,7 +213,7 @@ flowchart LR
     end
     subgraph After
         E2[Eval set, loose bounds] --> M2[Measure each turn]
-        M2 --> F2[Fixed rule: 2x calls, 3x tokens]
+        M2 --> F2[Fixed rule: 2x tool calls, +2 model calls, 3x tokens]
         F2 --> S2[Settings]
         S2 --> L2[Ledger counts every call and retry]
     end

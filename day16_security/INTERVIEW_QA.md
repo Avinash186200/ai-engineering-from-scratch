@@ -128,7 +128,7 @@ WHERE LEAKS HAPPEN
 - Memory/agent state: thread IDs guessable, or shared state across users.
 - Caches: a cached answer built from user A's data served to user B.
 - Logs and traces: other customers' data visible to support staff.
-- Fine-tuning on one client's data, served to another.
+- Fine-tuning on one customer's data, served to another.
 
 CONTROLS
 - Ownership check on every read (return 404 for others' IDs, so existence isn't confirmed).
@@ -237,7 +237,7 @@ HANDLING
 
 ```text
 QUESTIONS TO ANSWER FIRST
-What data is sent (PII, client data, trading data)? Where is it processed and stored? Is it used for training? Retention? Contracts (DPA), regulations (GDPR, DPDP Act in India, SEC/FINRA expectations), client agreements?
+What data is sent (PII, customer data, trading data)? Where is it processed and stored? Is it used for training? Retention? Contracts (DPA), regulations (GDPR, DPDP Act in India, SEC/FINRA expectations), customer agreements?
 
 CONTROLS
 - Data minimisation: send only what the task needs; aggregate or summarise first.
@@ -249,7 +249,7 @@ CONTROLS
 - A data classification policy: which classes may go to which provider.
 
 INTERVIEW LINE
-'For our clients the default was: client data stays in our environment; anything that goes to a model provider is minimised and covered by contract.'
+'For our customers the default was: customer data stays in our environment; anything that goes to a model provider is minimised and covered by contract.'
 ```
 
 </details>
@@ -304,12 +304,12 @@ PROPERTIES
 - Retention per policy/regulation; alerts on suspicious patterns (many denials, unusual tools).
 
 WHY
-Investigate incidents, prove compliance to clients/regulators, detect attacks in progress.
+Investigate incidents, prove compliance to customers/regulators, detect attacks in progress.
 ```
 
 </details>
 
-**Answer:** Authentication events, authorisation denials, every tool call with who, which tool, redacted arguments, the policy verdict and reason, human approvals for side-effecting actions, admin and configuration changes including prompt and model versions, and access to sensitive data. The log is append-only and separate from app logs, uses UTC times, user and trace IDs, contains no secrets or raw personal data, has retention set by policy, and alerts on patterns like repeated denials. It's what lets you investigate an incident and prove compliance to clients.
+**Answer:** Authentication events, authorisation denials, every tool call with who, which tool, redacted arguments, the policy verdict and reason, human approvals for side-effecting actions, admin and configuration changes including prompt and model versions, and access to sensitive data. The log is append-only and separate from app logs, uses UTC times, user and trace IDs, contains no secrets or raw personal data, has retention set by policy, and alerts on patterns like repeated denials. It's what lets you investigate an incident and prove compliance to customers.
 
 
 ## Scenarios
@@ -320,7 +320,7 @@ Investigate incidents, prove compliance to clients/regulators, detect attacks in
 
 ```text
 ASSESS
-- What was in the prompt? If it contains only behaviour instructions: low impact. If it contains secrets, internal URLs, client names or other users' data: an incident.
+- What was in the prompt? If it contains only behaviour instructions: low impact. If it contains secrets, internal URLs, customer names or other users' data: an incident.
 - Check traces for how it happened and whether others did it.
 
 IMMEDIATE
@@ -339,7 +339,7 @@ Tell the reporter thanks; if data was exposed, follow the incident process.
 
 **Answer:** First, assess what was in the prompt. If it's just behaviour instructions, impact is low; if it held secrets, internal URLs or confidential data, it's an incident: rotate any secrets immediately and remove sensitive content. Check traces for how it happened and whether others did the same. The real fix is to assume system prompts will leak: no secrets or confidential data in them, with private logic in code, plus output checks for prompt-leak patterns and extraction attempts added to the red-team eval set.
 
-### 13. Security review: what would you check before launching an AI assistant for a financial client?
+### 13. Security review: what would you check before launching an AI assistant for a financial services customer?
 
 <details><summary>Understand it</summary>
 
@@ -353,12 +353,12 @@ THE CHECKLIST
 6. Infrastructure: HTTPS, private database, minimal open ports, patched images, dependency scanning.
 7. Monitoring: audit logs, alerts on denials and spikes, incident runbook.
 8. Model risk: caveats, grounding checks, 'research signal not advice' framing, human review for decisions.
-9. Evidence for the client: UAT sign-off, penetration test if required, documented controls.
+9. Evidence for the customer: UAT sign-off, penetration test if required, documented controls.
 ```
 
 </details>
 
-**Answer:** I'd go through identity and access: SSO, server-side checks everywhere, ownership and tenant filters in retrieval. Data: what goes to the provider under what contract, redaction, encryption, retention and residency. Agency: the tool inventory, read versus write, confirmations, least-privilege credentials, egress allowlists and limits. Injection handling for documents and safe rendering, with red-team results. Secrets management, scanning and a tested rotation. Infrastructure: HTTPS, private database, patched images. Monitoring with audit logs and a runbook. Model risk: caveats and grounding, framed as research not advice. And evidence for the client: UAT sign-off and documented controls.
+**Answer:** I'd go through identity and access: SSO, server-side checks everywhere, ownership and tenant filters in retrieval. Data: what goes to the provider under what contract, redaction, encryption, retention and residency. Agency: the tool inventory, read versus write, confirmations, least-privilege credentials, egress allowlists and limits. Injection handling for documents and safe rendering, with red-team results. Secrets management, scanning and a tested rotation. Infrastructure: HTTPS, private database, patched images. Monitoring with audit logs and a runbook. Model risk: caveats and grounding, framed as research not advice. And evidence for the customer: UAT sign-off and documented controls.
 
 
 ## Glossary
