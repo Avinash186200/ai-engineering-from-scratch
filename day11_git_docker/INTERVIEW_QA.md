@@ -122,7 +122,7 @@ WHY IT MATTERS
 - Easy to revert one specific change.
 
 THE COMMIT HASH
-Each commit has a unique SHA (e.g. a1b2c3d...). Short hashes identify exact code - on our platform the production image was tagged main-a1b2c3d, tying the running container to an exact commit.
+Each commit has a unique SHA (e.g. a1b2c3d...). Short hashes identify exact code - on our platform the production image was tagged main-<short sha>, tying the running container to an exact commit.
 ```
 
 </details>
