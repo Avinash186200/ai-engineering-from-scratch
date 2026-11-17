@@ -214,9 +214,9 @@ A few terms you will hear. A base model is the output of pretraining only. A cha
 | Alignment | Making the model helpful, honest and harmless |
 | Knowledge cutoff | The date after which it saw no training data |
 
-Quick check. Pause and answer. A client says, let's fine tune the model on our fund factsheets, so it knows them. What do you say? The answer: fine tuning mainly teaches behaviour and format, not facts. Use retrieval for documents, and tools for numbers.
+Quick check. Pause and answer. A customer says, let's fine tune the model on our fund factsheets, so it knows them. What do you say? The answer: fine tuning mainly teaches behaviour and format, not facts. Use retrieval for documents, and tools for numbers.
 
-**Quick check:** A client says: “Let's fine-tune the model on our fund factsheets so it knows them.” What do you say?
+**Quick check:** A customer says: “Let's fine-tune the model on our fund factsheets so it knows them.” What do you say?
 
 <details><summary>Answer</summary>
 

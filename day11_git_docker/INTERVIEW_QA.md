@@ -122,7 +122,7 @@ WHY IT MATTERS
 - Easy to revert one specific change.
 
 THE COMMIT HASH
-Each commit has a unique SHA (e.g. 1cdf749...). Short hashes identify exact code - on our platform the production image was tagged main-1cdf749, tying the running container to an exact commit.
+Each commit has a unique SHA (e.g. a1b2c3d...). Short hashes identify exact code - on our platform the production image was tagged main-a1b2c3d, tying the running container to an exact commit.
 ```
 
 </details>
@@ -477,7 +477,7 @@ WHY IT MATTERS
 - Confidence to ship often.
 
 REAL EXAMPLE
-CI on every PR; merged images deployed to dev on our call; prod only with explicit per-step written approval and a rollback ready - continuous delivery, not continuous deployment, which suits an institutional client.
+CI on every PR; merged images deployed to dev on our call; prod only with explicit per-step written approval and a rollback ready - continuous delivery, not continuous deployment, which suits an institutional customer.
 ```
 
 </details>
@@ -588,7 +588,7 @@ HOW TO VERIFY IT'S THE SAME
 Compare image digests (content hashes), not just tags (tags can be moved).
 
 GOTCHA WE HIT
-Prod ran a newer Docker (29, containerd image store) that reported the MANIFEST digest; dev's Docker 26 reported the CONFIG digest. Same image, different-looking IDs, so our deploy kit's ID check failed. Fix: compare the config digest on both sides.
+Prod ran a newer Docker (29, containerd image store) that reported the MANIFEST digest; dev's Docker 26 reported the CONFIG digest. Same image, different-looking IDs, so the deploy script's image-ID check failed. Fix: compare the config digest on both sides.
 
 ROLLBACK
 Keep the previous image (and even the previous container, renamed) so rollback is one command.
@@ -648,7 +648,7 @@ SEMANTIC VERSIONING (MAJOR.MINOR.PATCH)
 - PATCH: bug fix.
 
 AI CONTEXT
-Model packages (wheels) versioned like models-mbs-w2d-tba 0.3.0. Pin exact versions in deployments so 'what model is running' is always known. Tag-triggered CI can build and publish packages/images.
+Model packages (wheels) versioned like forecast-models 0.3.0. Pin exact versions in deployments so 'what model is running' is always known. Tag-triggered CI can build and publish packages/images.
 ```
 
 </details>
@@ -736,7 +736,7 @@ A shipping container: whatever is inside, ports and ships handle it the same way
 IMAGE
 - A read-only, layered snapshot: base OS files + runtime + libraries + your code + metadata (start command, env defaults, exposed ports).
 - Built from a Dockerfile with docker build.
-- Identified by a name:tag (mcp-mbs:main-1cdf749) and an immutable digest (sha256:...).
+- Identified by a name:tag (model-server:main-a1b2c3d) and an immutable digest (sha256:...).
 - Stored locally or in a registry.
 
 CONTAINER
@@ -934,12 +934,12 @@ docker run -v /home/me/project:/app ...
 tmpfs: in-memory, for temporary sensitive data.
 
 PRODUCTION PRACTICE
-Often the database is a MANAGED service outside Docker (our case: Cloud SQL with daily backups), so app containers stay stateless and can be replaced freely. Gotcha: /tmp on some hosts is tmpfs (wiped on reboot) - keep deploy kits/backups elsewhere.
+Often the database is a MANAGED service outside Docker (our case: managed Postgres with daily backups), so app containers stay stateless and can be replaced freely. Gotcha: /tmp on some hosts is tmpfs (wiped on reboot) - keep deploy kits/backups elsewhere.
 ```
 
 </details>
 
-**Answer:** Data written inside a container dies with it, so I use named volumes for persistent data and bind mounts for development code or config files. In production I prefer stateless containers with a managed database outside Docker — ours was Cloud SQL with daily backups — so containers can be replaced freely.
+**Answer:** Data written inside a container dies with it, so I use named volumes for persistent data and bind mounts for development code or config files. In production I prefer stateless containers with a managed database outside Docker — ours was managed Postgres with daily backups — so containers can be replaced freely.
 
 ### 32. How do containers communicate? Ports and networks.
 
@@ -981,7 +981,7 @@ services:
     env_file: prod.env
     depends_on: [mcp]
   mcp:
-    image: mcp-mbs:main-1cdf749
+    image: model-server:main-a1b2c3d
     restart: unless-stopped
     healthcheck: {test: ["CMD","curl","-f","http://localhost:8000/health"]}
   nginx:
@@ -1068,7 +1068,7 @@ STEP BY STEP
 SINGLE-HOST APPROACH (what we did)
 1. CI built the image tagged by commit; pull it on the server.
 2. Verify the image ID/digest matches what was tested on dev.
-3. Rename the old container and keep it (e.g. mcp-mbs-pre-rollout-<timestamp>) - instant rollback.
+3. Rename the old container and keep it (e.g. model-server-pre-rollout-<timestamp>) - instant rollback.
 4. Start the new container with the same config.
 5. Health check + functional verification: all tools respond (gateway 16/16 tools), real answers correct.
 6. Record what is live (image, time, verifier). Downtime ~3.4 minutes.
@@ -1103,7 +1103,7 @@ WHY
 - Immutable digests; tags for humans.
 
 TAGGING STRATEGY
-- Unique, immutable tags: commit SHA (main-1cdf749) or version (1.4.2).
+- Unique, immutable tags: commit SHA (main-a1b2c3d) or version (1.4.2).
 - Avoid deploying 'latest' - you can't tell what's running and it can change under you.
 
 ALSO FOR PYTHON PACKAGES
@@ -1136,7 +1136,7 @@ WHEN TO MOVE
 Many services, many hosts, autoscaling needs, high availability requirements, a team able to operate it - or use a managed option (GKE, EKS) or simpler serverless containers (Cloud Run).
 
 OUR CHOICE
-Docker on Compute Engine VMs: right-sized for a handful of services and one main client. Growth path: Cloud Run for stateless services, GKE when scale demands.
+Docker on Compute Engine VMs: right-sized for a handful of services and one main customer. Growth path: Cloud Run for stateless services, GKE when scale demands.
 ```
 
 </details>

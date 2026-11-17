@@ -133,7 +133,7 @@ Here is redaction in action. Rahul types his name, email, phone and how much he 
 
 **What reaches the log**
 
-> **User:** I'm Rahul Mehta (rahul.m@mail.in, 98xxxxxx21), I hold ₹40 lakh in Deccan Bond Fund. Risky?
+> **User:** I'm Rahul Mehta (rahul.m@example.com, 98xxxxxx21), I hold ₹40 lakh in Deccan Bond Fund. Risky?
 >
 > **Assistant:** Logged as: I'm [NAME] ([EMAIL], [PHONE]), I hold [AMOUNT] in Deccan Bond Fund. Risky?
 

@@ -13,7 +13,7 @@ Every command from Day 11, grouped. Practise them in the labs: [git/LAB.md](git/
 | Inspect | `git status` | What changed, what's staged | Type it constantly |
 | Inspect | `git diff / git diff --staged` | Line changes unstaged / staged |  |
 | Inspect | `git log --oneline --graph -10` | Recent history as a graph |  |
-| Inspect | `git show <hash>` | What one commit changed | git show 1cdf749 |
+| Inspect | `git show <hash>` | What one commit changed | git show a1b2c3d |
 | Inspect | `git blame <file>` | Who last changed each line |  |
 | Save | `git add <file> / git add -p` | Stage a file / stage chosen hunks | -p = pick pieces interactively |
 | Save | `git commit -m "msg"` | Save staged snapshot | Imperative message: what + why |

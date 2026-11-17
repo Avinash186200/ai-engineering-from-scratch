@@ -491,8 +491,8 @@ PR + CI (types, lint, tests, API fuzzing, evals) -> one image per commit -> depl
 5. OPERATIONS
 OpenTelemetry traces, dashboards, alerts (including data freshness), on-call runbook, postmortems.
 
-6. CLIENT DELIVERY
-A UAT environment that mirrors prod, a UAT question catalogue signed off before go-live, and a change process the client trusts.
+6. CUSTOMER DELIVERY
+A UAT environment that mirrors prod, a UAT question catalogue signed off before go-live, and a change process the customer trusts.
 ```
 
 </details>

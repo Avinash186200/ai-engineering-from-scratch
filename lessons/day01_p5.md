@@ -193,7 +193,7 @@ When an interviewer asks, which model would you use, never answer with a brand. 
 
 Three: speed. How long until the first word appears, and the total time, compared to what your users will tolerate. Four: the context length you need for your documents and conversations.
 
-Five: data rules. Is the client's data allowed to leave the country, or go to this provider? And six: risk. Rate limits, uptime, and when the provider will retire the model. Six points, and you sound like an engineer, not a fan.
+Five: data rules. Is the customer's data allowed to leave the country, or go to this provider? And six: risk. Rate limits, uptime, and when the provider will retire the model. Six points, and you sound like an engineer, not a fan.
 
 **How to choose a model**
 

@@ -31,12 +31,12 @@ Welcome back. In the last part, we added a safe front door, automatic checks, an
 
 Let's start with a design decision that makes everything else in this video possible: one adapter, through which every LLM call must pass.
 
-Why an adapter? Providers change models and prices every few months. A client may insist on a particular provider. You may want cheap steps on a cheap model. Retries and logging must happen on every call, so they belong in one place. And for testing, the fake LLM from Day 3 plugs into the same shape, with no key and no cost.
+Why an adapter? Providers change models and prices every few months. A customer may insist on a particular provider. You may want cheap steps on a cheap model. Retries and logging must happen on every call, so they belong in one place. And for testing, the fake LLM from Day 3 plugs into the same shape, with no key and no cost.
 
 **Five reasons to never call a provider directly**
 
 - Providers change models, prices and APIs every few months
-- Clients may require a specific provider or region
+- Customers may require a specific provider or region
 - Routing: cheap steps to cheap models
 - Retries, timeouts, logging: in one place, never forgotten
 - Testing: a fake LLM with the same shape costs nothing
