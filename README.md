@@ -46,9 +46,9 @@ Python 3.11. Run every command from the repo root.
 | `day03_agents/` | 3 | Agents with LangGraph: tools, state, memory, limits | `python day03_agents/agent.py` |
 | `day04_mcp/` | 4 | Model Context Protocol server, client, property tests | `python day04_mcp/mcp_client.py`<br>`python -m pytest day04_mcp/test_properties.py -q` |
 | `day05_rag/` | 5 | RAG: chunking, embeddings, BM25, hybrid, prompt, eval | `python day05_rag/mini_rag.py "What is an exit load?"`<br>`python day05_rag/mini_rag.py --eval` |
-| `day06_evals/` | 6 | Golden set and an eval gate for CI | `python day06_evals/eval_harness.py` |
-| `day07_ml/` | 7 | Classical ML done honestly (purging, embargo, CPCV); LoRA arithmetic | `python day07_ml/train_ranker.py`<br>`python day07_ml/lora_params.py` |
-| `day08_production/` | 8 | FastAPI, SSE streaming, retries, failover, circuit breaker, Docker | `python day08_production/llm_adapter.py`<br>`python day08_production/app.py --selftest` |
+| `day06_evals/` | 6 | Golden set and an eval gate for CI; pass-rate intervals and paired comparison; deep-dive notes | `python day06_evals/eval_harness.py`<br>`python day06_evals/eval_stats.py` |
+| `day07_ml/` | 7 | Classical ML done honestly (purging, embargo, CPCV); LoRA arithmetic | `python day07_ml/train_ranker.py`<br>`python day07_ml/lora_params.py`<br>read `ADAPTATION_NOTES.md` |
+| `day08_production/` | 8 | FastAPI, SSE streaming, retries, failover, circuit breaker, Docker | `python day08_production/llm_adapter.py`<br>`python day08_production/app.py --selftest`<br>read `ROLLOUT_CHECKLIST.md` |
 | `day09_design/` | 9 | AI system design template | read `design_template.md` |
 | `day10_mock/` | 10 | Mock interview coding rounds | `python day10_mock/coding_round_agent.py`<br>`python day10_mock/coding_round_retrieval.py` |
 | `day11_git_docker/` | 11 | Git, GitHub, CI/CD and Docker: labs, cheat sheet, interview Q&A | `python day11_git_docker/docker/app.py --selftest`<br>then follow `day11_git_docker/docker/LAB.md` |
@@ -59,6 +59,8 @@ Python 3.11. Run every command from the repo root.
 | `day16_security/` | 16 | Security: prompt injection, tool policy gate, auth, secrets scanning | `python day16_security/injection.py`<br>`python day16_security/tool_policy.py` |
 | `day17_product/` | 17 | Models as a product: one model for agent, Excel, notebooks; versioned API; contract check | `python day17_product/service.py`<br>`python day17_product/contract_check.py` |
 | `arch_evolution/` | special | How AI assistant architecture evolves: router to agent loop, verification, contracts, bounds, honest evals, fail-closed config | `python arch_evolution/verifier_demo.py`<br>`python -m pytest arch_evolution -q` |
+| `system_design/` | special | Design-round method, estimates, STAR template, four worked AI system designs | read `README.md` |
+| `interview_bank/` | special | Practical interview questions by topic, with an index of every Q&A bank in the repo | read `README.md` |
 | `interview_special/` | special | 10 AI agent interview questions with model answers and timestamps | read `README.md` |
 
 ## The tools (core/fund_model.py)
