@@ -42,7 +42,7 @@ forecasting or churn model as examples. Replace them with your own work when you
 ## Practise with flashcards
 
 [`make_flashcards.py`](make_flashcards.py) turns every question in the banks listed above into a card in
-[`flashcards.csv`](flashcards.csv) (286; for `system_design/`, only the follow-up probes). Each answer is its
+[`flashcards.csv`](flashcards.csv) (310; for `system_design/`, only the follow-up probes). Each answer is its
 first whole sentences, up to 80 words, then the file with the rest. The third column is the topic, used as a tag.
 
 After you change any question file, rebuild it. CI fails if the file is out of date

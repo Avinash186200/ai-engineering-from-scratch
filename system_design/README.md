@@ -1,7 +1,7 @@
-# System design for AI products
+# System design for AI and ML products
 
-A method for the 45-minute design round, plus worked designs to practise on. The short template is in
-[`day09_design/design_template.md`](../day09_design/design_template.md); this folder goes deeper.
+A method for the 45-minute design round, plus eight worked designs to practise on: four AI and four ML. The short
+template is in [`day09_design/design_template.md`](../day09_design/design_template.md); this folder goes deeper.
 
 | File | What |
 |---|---|
@@ -11,6 +11,10 @@ A method for the 45-minute design round, plus worked designs to practise on. The
 | [`02_forecast_copilot.md`](02_forecast_copilot.md) | A copilot over live demand-forecast models (tools, grounding, parity) |
 | [`03_multi_tenant_platform.md`](03_multi_tenant_platform.md) | An agent platform that many separate organisations share |
 | [`04_support_triage_agent.md`](04_support_triage_agent.md) | A support-ticket agent that can take actions (permissions, human approval) |
+| [`05_churn_prediction_with_retraining.md`](05_churn_prediction_with_retraining.md) | Subscription churn: late labels, calibration, retraining policy, promotion gates |
+| [`06_fraud_detection_realtime.md`](06_fraud_detection_realtime.md) | Card fraud scoring under 100 ms: feature parity, extreme imbalance, cost-based thresholds |
+| [`07_demand_forecasting.md`](07_demand_forecasting.md) | Demand per item and store: hierarchy, intermittent demand, walk-forward backtests |
+| [`08_ranking_recommendations.md`](08_ranking_recommendations.md) | Recommendations: retrieval and ranking, offline metrics against A/B tests, position bias |
 
 ## What the interviewer scores
 
@@ -34,6 +38,9 @@ modes before being asked, and you cut a v1.
 | 5 Data and security | 3 min | Access control, PII, secrets, prompt injection, audit log |
 | 6 Operations | 3 min | CI with an eval gate, tracing, cost controls, canary and rollback |
 | 7 Trade-offs | 3 min | What v1 leaves out, what comes next, and what would trigger it |
+
+In the ML designs (05-08) the deep dive is usually the label and its delay, leakage, the metric and the threshold,
+or retraining and monitoring.
 
 Say the trade-off every time: "Retrieval rather than fine-tuning, because the documents change weekly and users
 need citations."

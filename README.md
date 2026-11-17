@@ -62,7 +62,7 @@ Python 3.11. Run every command from the repo root.
 | `day17_product/` | 17 | Models as a product: one model for agent, Excel, notebooks; versioned API; contract check | `python day17_product/service.py`<br>`python day17_product/contract_check.py` |
 | [`arch_evolution/`](arch_evolution/README.md) | special | How AI assistant architecture evolves: router to agent loop, verification, contracts, bounds, honest evals, fail-closed config | `python arch_evolution/verifier_demo.py`<br>`python -m pytest arch_evolution -q` |
 | [`lessons_learned/`](lessons_learned/README.md) | special | Ten real lessons from my own work: leakage, honest evals, grounding, fine-tuning, MLOps, shipping safely, production surprises, reviews | read `README.md` |
-| [`system_design/`](system_design/README.md) | special | Design-round method, estimates, STAR template, four worked AI system designs | read `README.md` |
+| [`system_design/`](system_design/README.md) | special | Design-round method, estimates, STAR template, eight worked designs (four AI, four ML) | read `README.md` |
 | [`interview_bank/`](interview_bank/README.md) | special | Practical interview questions by topic, with an index of every Q&A bank in the repo | read `README.md` |
 | [`interview_special/`](interview_special/README.md) | special | 10 AI agent interview questions with model answers and timestamps | read `README.md` |
 
