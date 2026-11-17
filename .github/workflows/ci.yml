@@ -35,3 +35,5 @@ jobs:
       - run: python day17_product/service.py
       - run: python day17_product/client.py
       - run: python day17_product/contract_check.py
+      - run: python arch_evolution/verifier_demo.py
+      - run: python -m pytest arch_evolution -q

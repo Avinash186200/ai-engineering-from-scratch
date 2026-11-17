@@ -58,6 +58,7 @@ Python 3.11. Run every command from the repo root.
 | `day15_testing/` | 15 | Testing AI services: pytest, Hypothesis, API contracts, LLM behaviour tests, CI | `python -m pytest day15_testing -q` |
 | `day16_security/` | 16 | Security: prompt injection, tool policy gate, auth, secrets scanning | `python day16_security/injection.py`<br>`python day16_security/tool_policy.py` |
 | `day17_product/` | 17 | Models as a product: one model for agent, Excel, notebooks; versioned API; contract check | `python day17_product/service.py`<br>`python day17_product/contract_check.py` |
+| `arch_evolution/` | special | How AI assistant architecture evolves: router to agent loop, verification, contracts, bounds, honest evals, fail-closed config | `python arch_evolution/verifier_demo.py`<br>`python -m pytest arch_evolution -q` |
 | `interview_special/` | special | 10 AI agent interview questions with model answers and timestamps | read `README.md` |
 
 ## The tools (core/fund_model.py)
