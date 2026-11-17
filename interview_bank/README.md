@@ -29,6 +29,7 @@ forecasting or churn model as examples. Replace them with your own work when you
 | Models as a product | [`day17_product/INTERVIEW_QA.md`](../day17_product/INTERVIEW_QA.md) |
 | AI agents in production (video) | [`interview_special/README.md`](../interview_special/README.md) |
 | How architectures evolve | [`arch_evolution/`](../arch_evolution/) |
+| Lessons learned | [`lessons_learned/INTERVIEW_QA.md`](../lessons_learned/INTERVIEW_QA.md) |
 | System design and STAR | [`system_design/`](../system_design/README.md) |
 
 ## How to practise
@@ -40,8 +41,9 @@ forecasting or churn model as examples. Replace them with your own work when you
 
 ## Practise with flashcards
 
-[`flashcards.csv`](flashcards.csv) has every question in this repo as a card. The answer is the first sentences
-(about 80 words) of the full answer, then the file that has the rest. The third column is the topic, used as a tag.
+[`make_flashcards.py`](make_flashcards.py) turns every question in the banks listed above into a card in
+[`flashcards.csv`](flashcards.csv) (286; for `system_design/`, only the follow-up probes). Each answer is its
+first whole sentences, up to 80 words, then the file with the rest. The third column is the topic, used as a tag.
 
 After you change any question file, rebuild it. CI fails if the file is out of date
 (`day15_testing/test_flashcards.py`).

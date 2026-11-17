@@ -78,7 +78,7 @@ and readiness returns 503.
 
 **Challenge.** It was "6", picked by feel. Retries inside the adapter were not counted anywhere.
 **What we changed.** Every bound is a setting. A per-turn ledger counts model calls, retries, tool calls, tokens
-and spend. I measured 38 offline runs and applied a fixed rule: 2x the largest tool-call counts, the largest model-call count plus 2, and 3x tokens.
+and spend. I measured 38 offline runs and applied a fixed rule: 2x the largest tool-call counts, the largest model-call count plus 2, and 3x the largest token count rounded up to the next 1,000.
 **What improved.** Max seen was 3 model calls and about 4,500 tokens, so the defaults are 5 model calls and
 14,000 tokens, with a written reason.
 **Honest limit.** Those came from a scripted model. A real model explores more, so I re-derive them.

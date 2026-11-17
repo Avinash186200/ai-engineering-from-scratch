@@ -1,6 +1,6 @@
 # Lessons
 
-All 42 episodes in order. Each lesson page has the video, clickable chapters, the slide content and the full narration, plus a link to the code. Playlist: [AI Engineering from Scratch, in order](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
+The 42 episodes of Days 1-10, in order. Each lesson page has the video, clickable chapters, the slide content and the full narration, plus a link to the code. Playlist: [AI Engineering from Scratch, in order](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
 
 | Day | Part | Lesson | Video |
 |---|---|---|---|

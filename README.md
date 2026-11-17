@@ -16,8 +16,8 @@ Add `--real` (and set `ANTHROPIC_API_KEY`) to use Claude through the same adapte
 
 - **Full course, in order (50 episodes):** [YouTube playlist](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
   Start with [Day 1, Part 1: What is a Large Language Model?](https://youtu.be/uXoD4kXr1YY)
-- **Lesson notes:** [`lessons/`](lessons/README.md) has one page per episode: the video, clickable chapters,
-  the slide content and the full narration, with a link to that day's code. Read along, then run the code.
+- **Lesson notes:** [`lessons/`](lessons/README.md) has one page per episode for Days 1-10: the video, clickable
+  chapters, the slide content and the full narration, with a link to that day's code. Read along, then run the code.
 - **Shorts, one idea in 60 seconds:** [AI Engineering in 60 Seconds](https://www.youtube.com/playlist?list=PLAFfNHJdmoFI)
   (temperature, tokens, hallucination, prompt injection, the agent loop, MCP, RAG, LoRA, evals and more).
 - **Interview prep:** [10 AI agent interview questions with model answers](https://youtu.be/_rVcMiSIjro)
