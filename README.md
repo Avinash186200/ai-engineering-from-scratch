@@ -70,6 +70,7 @@ Python 3.11. Run every command from the repo root.
 | `day15_testing/` | 15 | Testing AI services: pytest, Hypothesis, API contracts, LLM behaviour tests, CI | `python -m pytest day15_testing -q` |
 | `day16_security/` | 16 | Security: prompt injection, tool policy gate, auth, secrets scanning | `python day16_security/injection.py`<br>`python day16_security/tool_policy.py` |
 | `day17_product/` | 17 | Models as a product: one model for agent, Excel, notebooks; versioned API; contract check | `python day17_product/service.py`<br>`python day17_product/contract_check.py` |
+| `day18_agent_testing/` | 18 | Testing and debugging LLM agents: multi-turn threads, journeys, YAML tests, tracing, a planted bug to debug, TDD, a Playwright smoke test, triage and release; cheat sheet and MBS primer | `python day18_agent_testing/run_threads.py`<br>read `CHEAT_SHEET.md` |
 | [`arch_evolution/`](arch_evolution/README.md) | special | How AI assistant architecture evolves: router to agent loop, verification, contracts, bounds, honest evals, fail-closed config | `python arch_evolution/verifier_demo.py`<br>`python -m pytest arch_evolution -q` |
 | [`lessons_learned/`](lessons_learned/README.md) | special | Ten real lessons from my own work: leakage, honest evals, grounding, fine-tuning, MLOps, shipping safely, production surprises, reviews | read `README.md` |
 | [`system_design/`](system_design/README.md) | special | Design-round method, estimates, STAR template, eight worked designs (four AI, four ML) | read `README.md` |

@@ -10,6 +10,7 @@ forecasting or churn model as examples. Replace them with your own work when you
 |---|---|---|
 | [`llm_fundamentals.md`](llm_fundamentals.md) | Tokens, sampling, hallucination, context, embeddings, prompting | 18 |
 | [`rag_in_practice.md`](rag_in_practice.md) | Chunking, hybrid search, reranking, PDFs, freshness, debugging | 16 |
+| [`agent_testing.md`](agent_testing.md) | Single vs multi-turn, long threads, YAML tests, tracing, flakiness, release | 40 |
 | [`agents_and_tools.md`](agents_and_tools.md) | Agent vs chatbot, tool design, MCP, memory, loops, failures | 16 |
 | [`context_cost_memory.md`](context_cost_memory.md) | Context engineering, caching, routing, memory design | 8 |
 | [`production.md`](production.md) | Deploy, outages, cost spikes, latency, versioning, scaling | 14 |
@@ -27,6 +28,7 @@ forecasting or churn model as examples. Replace them with your own work when you
 | Testing | [`day15_testing/INTERVIEW_QA.md`](../day15_testing/INTERVIEW_QA.md) |
 | Security | [`day16_security/INTERVIEW_QA.md`](../day16_security/INTERVIEW_QA.md) |
 | Models as a product | [`day17_product/INTERVIEW_QA.md`](../day17_product/INTERVIEW_QA.md) |
+| Agent testing and debugging | [`day18_agent_testing/INTERVIEW_QA.md`](../day18_agent_testing/INTERVIEW_QA.md) |
 | AI agents in production (video) | [`interview_special/README.md`](../interview_special/README.md) |
 | How architectures evolve | [`arch_evolution/`](../arch_evolution/) |
 | Lessons learned | [`lessons_learned/INTERVIEW_QA.md`](../lessons_learned/INTERVIEW_QA.md) |
@@ -42,7 +44,7 @@ forecasting or churn model as examples. Replace them with your own work when you
 ## Practise with flashcards
 
 [`make_flashcards.py`](make_flashcards.py) turns every question in the banks listed above into a card in
-[`flashcards.csv`](flashcards.csv) (310; for `system_design/`, only the follow-up probes). Each answer is its
+[`flashcards.csv`](flashcards.csv) (363; for `system_design/`, only the follow-up probes). Each answer is its
 first whole sentences, up to 80 words, then the file with the rest. The third column is the topic, used as a tag.
 
 After you change any question file, rebuild it. CI fails if the file is out of date

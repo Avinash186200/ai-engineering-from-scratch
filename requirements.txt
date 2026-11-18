@@ -10,4 +10,5 @@ mcp>=1.2               # day04
 tiktoken>=0.7          # day01 tokens_demo (optional: falls back to a toy tokenizer)
 hypothesis>=6.0        # day04 test_properties
 pytest>=7.0
+pyyaml>=6.0            # day18 YAML tests
 anthropic>=0.40        # optional: only for --real / LLM_PROVIDERS=claude

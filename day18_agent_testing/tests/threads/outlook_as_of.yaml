@@ -1,0 +1,27 @@
+# The user anchors to the snapshot date, then keeps referring back to it.
+# Every later turn must keep using that date, not the newest partial load.
+thread: outlook_as_of
+description: Greeting, data date, two outlooks and a bond metric, all as of the snapshot date
+turns:
+  - user: "Good morning"
+    expect_tool: null
+  - user: "What date is the data? Is it fresh?"
+    expect_tool: get_snapshot_date
+    expect_params: {}
+    expect_as_of: null
+    grounded_keys: [snapshot_date, latest_available]
+  - user: "Give me the 5-day outlook as of that date"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 5}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [rate_change_bp, spread_change_bp]
+  - user: "and the 21-day?"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 21}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [rate_change_bp, spread_change_bp]
+  - user: "What is the effective duration of POOL-A30 as of then?"
+    expect_tool: get_bond_metrics
+    expect_params: {bond_id: POOL-A30}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [eff_duration, oas_bp]

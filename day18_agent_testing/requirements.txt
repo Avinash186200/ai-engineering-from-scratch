@@ -1,0 +1,5 @@
+pyyaml>=6.0
+pytest>=7.0
+pytest-playwright>=0.5   # optional: UI smoke test is skipped without it (then: python -m playwright install chromium)
+anthropic>=0.40          # optional: only for LAB_LLM=anthropic
+langfuse>=2.0            # optional: only if LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY are set

@@ -1,0 +1,26 @@
+# A journey is one user goal. It passes only if enough steps pass.
+# required: 5 of 5 means 4 of 5 is a FAIL. Almost right is still wrong
+# when the wrong step gives a number from the wrong date.
+journey: morning_check
+description: Start of day, check freshness, read both outlooks and one bond as of the snapshot
+pass_threshold: {required: 5, of: 5}
+turns:
+  - user: "Good morning"
+    expect_tool: null
+  - user: "What date is the data? Is it fresh?"
+    expect_tool: get_snapshot_date
+    expect_as_of: null
+  - user: "Give me the 5-day outlook as of that date"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 5}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [rate_change_bp]
+  - user: "and the 21-day?"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 21}
+    expect_as_of: "2026-11-13"
+  - user: "What is the OAS of POOL-B15 as of then?"
+    expect_tool: get_bond_metrics
+    expect_params: {bond_id: POOL-B15}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [oas_bp]

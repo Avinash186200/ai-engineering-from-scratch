@@ -1,0 +1,24 @@
+# Explicit dates win; a follow-up keeps the explicit date; asking for the data date re-anchors.
+thread: explicit_dates
+description: Explicit as_of, follow-up horizon, then a data-date question
+turns:
+  - user: "What's the 21-day outlook as of 2026-11-12?"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 21}
+    expect_as_of: "2026-11-12"
+    grounded_keys: [rate_change_bp, confidence]
+  - user: "Now the 5-day"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 5}
+    expect_as_of: "2026-11-12"
+    grounded_keys: [rate_change_bp]
+  - user: "What date is the latest snapshot?"
+    expect_tool: get_snapshot_date
+    expect_params: {}
+    expect_as_of: null
+    grounded_keys: [snapshot_date]
+  - user: "The 5-day outlook again, please"
+    expect_tool: get_outlook
+    expect_params: {horizon_days: 5}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [spread_change_bp]

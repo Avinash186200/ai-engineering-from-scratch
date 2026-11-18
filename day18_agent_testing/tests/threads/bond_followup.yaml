@@ -1,0 +1,24 @@
+# "its", "then" and "that one" must resolve to the bond and date from earlier turns.
+thread: bond_followup
+description: Pronoun and date carry-over across bond questions
+turns:
+  - user: "What is the OAS of POOL-A30 as of 2026-11-12?"
+    expect_tool: get_bond_metrics
+    expect_params: {bond_id: POOL-A30}
+    expect_as_of: "2026-11-12"
+    grounded_keys: [oas_bp]
+  - user: "And its duration as of then?"
+    expect_tool: get_bond_metrics
+    expect_params: {bond_id: POOL-A30}
+    expect_as_of: "2026-11-12"
+    grounded_keys: [eff_duration]
+  - user: "What about the convexity of POOL-B15?"
+    expect_tool: get_bond_metrics
+    expect_params: {bond_id: POOL-B15}
+    expect_as_of: "2026-11-12"
+    grounded_keys: [convexity]
+  - user: "And that one as of 2026-11-13?"
+    expect_tool: get_bond_metrics
+    expect_params: {bond_id: POOL-B15}
+    expect_as_of: "2026-11-13"
+    grounded_keys: [oas_bp, eff_duration]
