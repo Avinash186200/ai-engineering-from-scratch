@@ -12,6 +12,16 @@ seed). Nothing in this repo is investment advice, and no real fund is described.
 No API key is needed. Every LLM script runs with a deterministic `FakeLLM` by default.
 Add `--real` (and set `ANTHROPIC_API_KEY`) to use Claude through the same adapter.
 
+## Quick start
+
+```bash
+git clone https://github.com/Avinash186200/ai-engineering-from-scratch
+cd ai-engineering-from-scratch
+python day06_evals/eval_harness.py   # after the install steps in Setup below; ends with "pass rate 10/10 = 100%"
+```
+
+Install steps are in [Setup](#setup).
+
 ## Watch and learn
 
 - **Full course, in order (50 episodes):** [YouTube playlist](https://www.youtube.com/playlist?list=PLKRdiVI5CiMg).
